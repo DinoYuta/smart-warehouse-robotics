@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Execution Simulator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script th:src="@{/js/app-settings.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div class="app-layout">
+    <aside th:replace="~{fragments/sidebar :: sidebar('simulation')}"></aside>
+
+    <div class="workspace">
+        <header class="top-bar">
+            <div class="fw-bold text-primary">Decision Engine</div>
+            <div th:replace="~{fragments/topbar-controls :: topbarControls}"></div>
+        </header>
+
+        <main class="page-canvas">
+            <section class="mb-4">
+                <h1 class="h2 fw-bold mb-1">Execution Simulator</h1>
+                <p class="text-secondary mb-0">Simulate robot conditions to test rule evaluation and strategy execution.</p>
+            </section>
+
+            <section class="row g-4">
+                <div class="col-12 col-lg-4">
+                    <div class="stitch-card h-100 d-flex flex-column">
+                        <div class="card-title-row">
+                            <span class="material-symbols-outlined">tune</span>
+                            <h2 class="h5 fw-semibold mb-0">Simulation Parameters</h2>
+                        </div>
+                        <form class="p-4 d-flex flex-column flex-grow-1" th:action="@{/simulation}" th:object="${simulationRequest}" method="post">
+                            <div class="mb-3">
+                                <label for="battery" class="form-label fw-semibold">Battery Level (%)</label>
+                                <input id="battery" class="form-control" type="number" min="0" max="100" th:field="*{battery}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="robotLoad" class="form-label fw-semibold">Robot Load (%)</label>
+                                <input id="robotLoad" class="form-control" type="number" min="0" max="100" th:field="*{robotLoad}" required>
+                                <div class="form-text" data-i18n-text="robotLoad means estimated cargo load percentage. Small Cargo = 30%, Medium Cargo = 60%, Large Cargo = 90%.">robotLoad means estimated cargo load percentage. Small Cargo = 30%, Medium Cargo = 60%, Large Cargo = 90%.</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="distance" class="form-label fw-semibold">Distance (m)</label>
+                                <input id="distance" class="form-control" type="number" min="0" step="0.1" th:field="*{distance}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="priority" class="form-label fw-semibold">Task Priority</label>
+                                <input id="priority" class="form-control" type="number" min="1" max="5" th:field="*{priority}" required>
+                            </div>
+                            <div class="form-check form-switch d-flex align-items-center justify-content-between border-top border-bottom py-3 mb-4">
+                                <label for="obstacleDetected" class="form-check-label fw-semibold">Obstacle Detected</label>
+                                <input id="obstacleDetected" class="form-check-input" type="checkbox" th:field="*{obstacleDetected}">
+                            </div>
+                            <button class="btn btn-primary mt-auto d-flex align-items-center justify-content-center gap-2" type="submit">
+                                <span class="material-symbols-outlined">play_arrow</span>
+                                Run Engine
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="col-12 col-lg-8">
+                    <div class="d-flex flex-column gap-4">
+                        <div class="stitch-card">
+                            <div class="card-title-row">
+                                <span class="material-symbols-outlined">account_tree</span>
+                                <h2 class="h5 fw-semibold mb-0">Execution Flow</h2>
+                            </div>
+                            <div class="p-4">
+                                <div class="flow-steps">
+                                    <div class="flow-step">
+                                        <span class="flow-step-icon"><span class="material-symbols-outlined">input</span></span>
+                                        <span class="fw-semibold">Input State</span>
+                                    </div>
+                                    <div class="flow-step">
+                                        <span class="flow-step-icon"><span class="material-symbols-outlined">rule</span></span>
+                                        <span class="fw-semibold">Interpreter</span>
+                                        <small class="text-secondary">Reads Conditions</small>
+                                    </div>
+                                    <div class="flow-step">
+                                        <span class="flow-step-icon"><span class="material-symbols-outlined">psychology</span></span>
+                                        <span class="fw-semibold">Strategy</span>
+                                        <small class="text-secondary">Selects Behavior</small>
+                                    </div>
+                                    <div class="flow-step">
+                                        <span class="flow-step-icon"><span class="material-symbols-outlined">smart_toy</span></span>
+                                        <span class="fw-semibold">Action</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="summary-strip">
+                            <span class="summary-strip-label">Engine</span>
+                            <span class="status-badge status-default">Interpreter Pattern</span>
+                            <span class="material-symbols-outlined fs-6 text-secondary">arrow_forward</span>
+                            <span class="status-badge status-default">Rule</span>
+                            <span class="material-symbols-outlined fs-6 text-secondary">arrow_forward</span>
+                            <span class="status-badge status-default">Strategy Pattern</span>
+                        </div>
+
+                        <div class="stitch-card" th:if="${result == null}">
+                            <div class="empty-state">Enter robot conditions and run the engine to show the decision trace.</div>
+                        </div>
+
+                        <div th:if="${result != null}" class="d-flex flex-column gap-4">
+                            <div class="stitch-card">
+                                <div class="card-title-row">
+                                    <span class="material-symbols-outlined">input</span>
+                                    <h2 class="h5 fw-semibold mb-0">Input Summary</h2>
+                                </div>
+                                <div class="p-3">
+                                    <div class="row g-3">
+                                        <div class="col-12 col-md-4">
+                                            <div class="metric-card p-3 h-100">
+                                                <div class="metric-label">Battery</div>
+                                                <div class="metric-value" th:text="|${result.battery}%|">15%</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-4">
+                                            <div class="metric-card p-3 h-100">
+                                                <div class="metric-label">Obstacle</div>
+                                                <div class="metric-value" th:text="${result.obstacleDetected ? 'Yes' : 'No'}">Yes</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-4">
+                                            <div class="metric-card p-3 h-100">
+                                                <div class="metric-label">Robot Load</div>
+                                                <div class="metric-value" th:text="|${result.robotLoad}%|">45%</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-4">
+                                            <div class="metric-card p-3 h-100">
+                                                <div class="metric-label">Distance</div>
+                                                <div class="metric-value" th:text="|${result.distance}m|">8.2m</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-4">
+                                            <div class="metric-card p-3 h-100">
+                                                <div class="metric-label">Priority</div>
+                                                <div class="metric-value" th:text="${result.priority}">1</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="stitch-card">
+                                <div class="card-title-row">
+                                    <span class="material-symbols-outlined">fact_check</span>
+                                    <h2 class="h5 fw-semibold mb-0">Final Decision Summary</h2>
+                                </div>
+                                <div class="p-4">
+                                    <div class="row g-3">
+                                        <div class="col-12 col-md-6">
+                                            <div class="result-card accent-primary h-100">
+                                                <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+                                                    <div class="metric-label">Rule Match Status</div>
+                                                    <span class="status-badge" th:classappend="${result.matched} ? ' status-moving' : ' status-default'" th:text="${result.matched ? 'MATCHED' : 'NO MATCH'}">MATCHED</span>
+                                                </div>
+                                                <div class="fw-semibold mb-2" th:text="${result.matchedRuleName}">Critical Battery With Obstacle Rule</div>
+                                                <div class="code-text bg-white border rounded p-2" th:text="${result.matchedConditionExpression}">battery &lt; 20 AND obstacleDetected == TRUE</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <div class="result-card accent-tertiary h-100">
+                                                <div class="metric-label d-flex align-items-center gap-1 mb-2">
+                                                    <span class="material-symbols-outlined fs-6">alt_route</span>
+                                                    Selected Strategy
+                                                </div>
+                                                <div class="h3 fw-bold mb-2" th:text="${result.selectedStrategy}">ChargingStrategy</div>
+                                                <p class="text-secondary mb-0">Dispatched by StrategyContext from the matched rule.</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="result-card highlight accent-primary">
+                                                <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
+                                                    <div class="fw-semibold text-primary d-flex align-items-center gap-1">
+                                                        <span class="material-symbols-outlined fs-6">electric_bolt</span>
+                                                        Final Robot Action
+                                                    </div>
+                                                    <span class="status-badge" th:classappend="${result.matched} ? ' status-moving' : ' status-default'" th:text="${result.matched ? 'Executing' : 'Idle'}">Executing</span>
+                                                </div>
+                                                <div class="h5 fw-bold mb-0" th:text="${result.actionMessage}">SIM-001 is routed to the nearest charging station.</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="stitch-card">
+                                <details class="trace-details">
+                                    <summary>
+                                        <span class="d-flex align-items-center gap-2">
+                                            <span class="material-symbols-outlined text-primary">list_alt</span>
+                                            <span class="h5 fw-semibold mb-0">Evaluation Trace</span>
+                                        </span>
+                                        <span class="status-badge status-default">Collapsed</span>
+                                    </summary>
+                                    <div class="table-responsive">
+                                        <table class="table compact-table align-middle mb-0">
+                                            <thead>
+                                            <tr>
+                                                <th>Priority</th>
+                                                <th>Rule Name</th>
+                                                <th>Condition Expression</th>
+                                                <th class="text-center">Result</th>
+                                                <th>Target Strategy</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr th:each="rule : ${result.ruleResults}"
+                                                th:classappend="${rule.matched and rule.ruleName == result.matchedRuleName} ? ' selected-rule-row' : ''">
+                                                <td th:text="${rule.priority}">1</td>
+                                                <td>
+                                                    <div class="fw-semibold" th:text="${rule.ruleName}">Critical Battery Rule</div>
+                                                    <span class="status-badge status-moving mt-1"
+                                                          th:if="${rule.matched and rule.ruleName == result.matchedRuleName}">Selected</span>
+                                                </td>
+                                                <td><span class="code-text" th:text="${rule.conditionExpression}">battery &lt; 20</span></td>
+                                                <td class="text-center">
+                                                    <span class="status-badge" th:classappend="${rule.matched} ? ' status-moving' : ' status-default'" th:text="${rule.matched ? 'MATCHED' : 'SKIPPED'}">MATCHED</span>
+                                                </td>
+                                                <td><span class="strategy-chip code-text" th:text="${rule.strategyName}">ChargingStrategy</span></td>
+                                            </tr>
+                                            <tr th:if="${#lists.isEmpty(result.ruleResults)}">
+                                                <td colspan="5"><div class="empty-state">No active rules were evaluated.</div></td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="p-3 border-top">
+                                        <div class="d-flex align-items-center gap-2 mb-3">
+                                            <span class="material-symbols-outlined text-primary">fact_check</span>
+                                            <h3 class="h6 fw-semibold mb-0">Condition Evaluation Details</h3>
+                                        </div>
+                                        <div class="d-flex flex-column gap-2">
+                                            <div class="condition-row" th:each="condition : ${result.conditionResults}">
+                                                <span class="code-text" th:text="${condition.expressionText}">battery &lt; 20</span>
+                                                <span class="status-badge" th:classappend="${condition.matched} ? ' status-moving' : ' status-default'" th:text="${condition.matched ? 'TRUE' : 'FALSE'}">TRUE</span>
+                                            </div>
+                                            <div class="empty-state" th:if="${#lists.isEmpty(result.conditionResults)}">No condition details are available because no active rules were evaluated.</div>
+                                        </div>
+                                    </div>
+                                </details>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+<script th:src="@{/js/app-notifications.js}" defer></script>
+</body>
+</html>

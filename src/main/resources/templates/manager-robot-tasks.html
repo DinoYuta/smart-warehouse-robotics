@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Manager Robot Task Board</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script th:src="@{/js/app-settings.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div class="app-layout">
+    <aside th:replace="~{fragments/sidebar :: sidebar('manager-robot-tasks')}"></aside>
+
+    <div class="workspace">
+        <header class="top-bar">
+            <div class="fw-bold text-primary">Manager Workflow</div>
+            <div th:replace="~{fragments/topbar-controls :: topbarControls}"></div>
+        </header>
+
+        <main class="page-canvas">
+            <section class="d-flex flex-column flex-xl-row justify-content-between gap-3 mb-4">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="status-badge status-default">Manager</span>
+                        <span class="status-badge status-moving">Robot workload</span>
+                    </div>
+                    <h1 class="h2 fw-bold mb-1">Manager Robot Task Board</h1>
+                    <p class="text-secondary mb-0">Monitor robot workload, priority pressure, and charging availability.</p>
+                </div>
+                <div class="d-flex align-items-start gap-2">
+                    <a class="btn btn-outline-primary d-flex align-items-center gap-2" th:href="@{/manager/policy-assignment}">
+                        <span class="material-symbols-outlined">assignment</span>
+                        Rule / Policy Assignment
+                    </a>
+                </div>
+            </section>
+
+            <details class="technical-details mb-4">
+                <summary>Workload definition</summary>
+                <p class="text-secondary mb-1">This read-only board groups database-backed missions by assigned robot.</p>
+                <p class="text-secondary mb-0">Active workload includes assigned PENDING, ASSIGNED, and IN_PROGRESS missions. WAITING_CONFIRMATION missions are counted separately because the robot can accept new work after returning to Base. COMPLETED, CANCELLED, and deleted missions do not count as active workload.</p>
+            </details>
+
+            <section class="row g-4 mb-4">
+                <div class="col-12 col-md-6 col-xl-3">
+                    <div class="metric-card p-3 h-100">
+                        <div class="metric-label">Robots on Board</div>
+                        <div class="metric-value" th:text="${#lists.size(taskBoard.robotTaskGroups)}">0</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-3">
+                    <div class="metric-card p-3 h-100">
+                        <div class="metric-label">Active Missions</div>
+                        <div class="metric-value" th:text="${taskBoard.totalActiveMissionCount}">0</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-3">
+                    <div class="metric-card p-3 h-100">
+                        <div class="metric-label">High Priority Active</div>
+                        <div class="metric-value" th:text="${taskBoard.totalHighPriorityMissionCount}">0</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-3">
+                    <div class="metric-card p-3 h-100">
+                        <div class="metric-label">Unassigned Pending</div>
+                        <div class="metric-value" th:text="${#lists.size(taskBoard.unassignedPendingMissions)}">0</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-3">
+                    <div class="metric-card p-3 h-100">
+                        <div class="metric-label" data-i18n="waitingConfirmation">Waiting Confirmation</div>
+                        <div class="metric-value" th:text="${taskBoard.totalPendingConfirmationCount}">0</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="row g-4 mb-4" th:if="${!#lists.isEmpty(taskBoard.robotTaskGroups)}">
+                <div class="col-12 col-xl-6" th:each="group : ${taskBoard.robotTaskGroups}"
+                     th:with="robot=${group.robot}, batteryStatus=${group.batteryStatus}, charging=${group.charging}, lowBattery=${group.lowBattery}, criticalBattery=${group.criticalBattery}, obstacle=${robot.obstacleDetected == true}, batteryDisplay=${group.batteryDisplayText}, batteryPercent=${group.batteryPercent}, batteryMessage=${group.batteryMessage}">
+                    <article class="stitch-card h-100">
+                        <div class="card-title-row justify-content-between align-items-start">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="robot-icon"><span class="material-symbols-outlined">smart_toy</span></span>
+                                <div>
+                                    <h2 class="h5 fw-semibold mb-0" th:text="${robot.name}">Picker Alpha</h2>
+                                    <div class="code-text text-secondary" th:text="${robot.code != null ? robot.code : 'Robot ID ' + robot.id}">RB-100</div>
+                                </div>
+                            </div>
+                            <span class="status-badge"
+                                  th:classappend="${charging} ? ' status-charging' : (${lowBattery or obstacle} ? ' status-alert' : (${robot.status == 'IDLE'} ? ' status-idle' : (${robot.status == 'MOVING'} ? ' status-moving' : (${robot.status == 'LOADED'} ? ' status-loaded' : ' status-default'))))"
+                                  th:text="${charging ? 'CHARGING' : (criticalBattery ? 'Charging Required' : (lowBattery ? 'Energy Saving' : (obstacle ? 'Obstacle Detected' : (robot.status != null ? robot.status : 'Unknown'))))}">STATUS</span>
+                        </div>
+
+                        <div class="p-4">
+                            <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                                <span class="strategy-chip code-text"
+                                      th:text="${group.currentStrategyDisplay}">Idle</span>
+                                <span class="status-badge status-default"
+                                      th:if="${group.primaryStrategyDifferent}"
+                                      th:text="${'Primary ' + group.primaryStrategyDisplay}">Primary FastRouteStrategy</span>
+                                <span class="status-badge status-moving"
+                                      th:if="${group.movementModeDisplayText != ''}"
+                                      th:text="${group.movementModeDisplayText}">Fast Mode</span>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-12 col-sm-4">
+                                    <div class="metric-list h-100">
+                                        <div class="metric-list-row flex-column align-items-start">
+                                            <span class="metric-label">Active mission count</span>
+                                            <span class="fw-bold" th:text="|${group.activeMissionCount} Active Missions|">0 Active Missions</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-4">
+                                    <div class="metric-list h-100">
+                                        <div class="metric-list-row flex-column align-items-start">
+                                            <span class="metric-label">High-priority active</span>
+                                            <span class="fw-bold" th:text="|${group.highPriorityMissionCount} High Priority|">0 High Priority</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-4">
+                                    <div class="metric-list h-100">
+                                        <div class="metric-list-row flex-column align-items-start">
+                                            <span class="metric-label">Battery level</span>
+                                            <span class="fw-bold" th:text="${batteryDisplay}">N/A</span>
+                                            <div class="battery-track w-100 mt-2">
+                                                <div class="battery-bar"
+                                                     th:classappend="${charging} ? ' charging' : (${lowBattery} ? ' low' : '')"
+                                                     th:style="${'width: ' + batteryPercent + '%;'}"></div>
+                                            </div>
+                                            <div class="mt-2" th:if="${charging or lowBattery or criticalBattery}">
+                                                <span class="status-badge"
+                                                      th:classappend="${charging} ? ' status-charging' : (${criticalBattery} ? ' status-alert' : ' status-warning')"
+                                                      th:text="${charging ? 'Charging' : (criticalBattery ? 'Critical Battery' : 'Low Battery')}">Low Battery</span>
+                                                <div class="battery-compact-message mt-1"
+                                                     th:text="${charging ? 'Charging at station.' : (criticalBattery ? 'Charging required after this task.' : batteryMessage)}">Energy saving mode active.</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="metric-list">
+                                        <div class="metric-list-row">
+                                            <span class="metric-label" data-i18n="waitingConfirmation">Waiting Confirmation</span>
+                                            <span class="fw-semibold"
+                                                  th:text="|${group.pendingConfirmationCount} pending confirmation|">0 pending confirmation</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="empty-state" th:if="${!group.hasActiveMissions()}">
+                                No active missions assigned to this robot.
+                            </div>
+
+                            <div class="table-responsive" th:if="${group.hasActiveMissions()}">
+                                <table class="table compact-table align-middle mb-0">
+                                    <thead>
+                                    <tr>
+                                        <th>Mission</th>
+                                        <th>Priority</th>
+                                        <th>Status</th>
+                                        <th>Strategy / Action</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="mission : ${group.activeMissions}"
+                                        th:with="strategyLabel=${mission.selectedStrategyName == 'FastRouteStrategy' ? 'Fast' : (mission.selectedStrategyName == 'EnergySavingStrategy' ? 'Energy Saving' : (mission.selectedStrategyName == 'HeavyLoadStrategy' ? 'Heavy Load' : (mission.selectedStrategyName == 'ObstacleAvoidanceStrategy' ? 'Obstacle Avoidance' : (mission.selectedStrategyName == 'ChargingStrategy' ? 'Charging' : (mission.selectedStrategyName == 'SafeRouteStrategy' ? 'Safe Route' : mission.selectedStrategyName)))))}">
+                                        <td>
+                                            <div class="fw-semibold" th:text="${mission.requestCode}">REQ-1001</div>
+                                            <div class="text-secondary small" th:text="${mission.customerName != null ? mission.customerName : 'Customer not provided'}">Customer A</div>
+                                            <div class="small">
+                                                <span th:text="${mission.cargoType}">Small Cargo</span>
+                                                <span class="text-secondary">/</span>
+                                                <span th:text="${mission.zone}">Zone A</span>
+                                                <span class="text-secondary">/</span>
+                                                <span class="code-text" th:text="${mission.locationCode}">A1</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="status-badge"
+                                                  th:classappend="${mission.priorityBadgeClass}"
+                                                  th:text="${mission.priorityLabel}">1 = High</span>
+                                        </td>
+                                        <td>
+                                            <span class="status-badge"
+                                                  th:classappend="${mission.statusBadgeClass}"
+                                                  th:text="${mission.status}">ASSIGNED</span>
+                                            <div class="metric-label mt-2">Execution</div>
+                                            <div class="code-text text-secondary" th:text="${mission.executionStepDisplay}">NOT_STARTED</div>
+                                            <div class="code-text text-secondary" th:if="${mission.currentPositionKey != null}" th:text="${mission.currentPositionKey}">base-station</div>
+                                        </td>
+                                        <td class="decision-cell">
+                                            <span class="strategy-chip"
+                                                  th:if="${mission.selectedStrategyName != null}"
+                                                  th:title="${mission.selectedStrategyName}"
+                                                  th:text="${strategyLabel}">Fast</span>
+                                            <span class="text-secondary small" th:if="${mission.selectedStrategyName == null}">Not selected yet.</span>
+                                            <div class="text-secondary small mt-1" th:if="${mission.decisionSummary == null and mission.actionMessage == null}">
+                                                Decision output not stored yet.
+                                            </div>
+                                            <details class="technical-details mt-2" th:if="${mission.hasDecisionOutput()}">
+                                                <summary>Details</summary>
+                                                <div class="metric-label">Rule</div>
+                                                <div class="small mb-2" th:text="${mission.matchedRuleName != null ? mission.matchedRuleName : 'Not evaluated yet.'}">Urgent Task Fast Route Rule</div>
+                                                <div class="metric-label">Selected Strategy</div>
+                                                <div class="small mb-2" th:text="${mission.selectedStrategyName != null ? mission.selectedStrategyName : 'Not selected yet.'}">FastRouteStrategy</div>
+                                                <div class="metric-label" th:if="${mission.actionMessage != null}">Robot Action</div>
+                                                <div class="small mb-2" th:if="${mission.actionMessage != null}" th:text="${mission.actionMessage}">Action summary</div>
+                                                <div class="metric-label">Decision Summary</div>
+                                                <div class="small text-secondary" th:text="${mission.decisionSummary != null ? mission.decisionSummary : 'No decision summary stored.'}">Decision summary</div>
+                                            </details>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <section class="stitch-card mb-4" th:if="${#lists.isEmpty(taskBoard.robotTaskGroups)}">
+                <div class="empty-state">No robots found. Seed robot data before reviewing the task board.</div>
+            </section>
+
+            <section class="stitch-card">
+                <div class="card-title-row justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="material-symbols-outlined">pending_actions</span>
+                        <h2 class="h5 fw-semibold mb-0">Unassigned Pending Missions</h2>
+                    </div>
+                    <span class="status-badge status-default" th:text="|${#lists.size(taskBoard.unassignedPendingMissions)} Pending|">0 Pending</span>
+                </div>
+                <div class="p-4">
+                    <div class="empty-state" th:if="${#lists.isEmpty(taskBoard.unassignedPendingMissions)}">
+                        No unassigned PENDING missions are waiting for robot assignment.
+                    </div>
+
+                    <div class="table-responsive" th:if="${!#lists.isEmpty(taskBoard.unassignedPendingMissions)}">
+                        <table class="table align-middle mb-0">
+                            <thead>
+                            <tr>
+                                <th>Request</th>
+                                <th>Cargo / Location</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="mission : ${taskBoard.unassignedPendingMissions}">
+                                <td>
+                                    <div class="fw-semibold" th:text="${mission.requestCode}">REQ-2001</div>
+                                    <div class="text-secondary small" th:text="${mission.customerName != null ? mission.customerName : 'Customer not provided'}">Customer B</div>
+                                </td>
+                                <td>
+                                    <span th:text="${mission.cargoType}">Medium Cargo</span>
+                                    <span class="text-secondary">/</span>
+                                    <span th:text="${mission.zone}">Zone B</span>
+                                    <span class="text-secondary">/</span>
+                                    <span class="code-text" th:text="${mission.locationCode}">B5</span>
+                                </td>
+                                <td>
+                                    <span class="status-badge"
+                                          th:classappend="${mission.priorityBadgeClass}"
+                                          th:text="${mission.priorityLabel}">1 = High</span>
+                                </td>
+                                <td>
+                                    <span class="status-badge"
+                                          th:classappend="${mission.statusBadgeClass}"
+                                          th:text="${mission.status}">PENDING</span>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section class="stitch-card mt-4">
+                <div class="card-title-row justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="material-symbols-outlined">cancel</span>
+                        <h2 class="h5 fw-semibold mb-0">Cancelled / Stopped Missions</h2>
+                    </div>
+                    <span class="status-badge status-default" th:text="|${#lists.size(taskBoard.cancelledMissions)} Cancelled|">0 Cancelled</span>
+                </div>
+                <div class="p-4">
+                    <div class="empty-state" th:if="${#lists.isEmpty(taskBoard.cancelledMissions)}">
+                        No cancelled or stopped missions are recorded.
+                    </div>
+
+                    <div class="table-responsive" th:if="${!#lists.isEmpty(taskBoard.cancelledMissions)}">
+                        <table class="table align-middle mb-0">
+                            <thead>
+                            <tr>
+                                <th>Mission</th>
+                                <th>Status</th>
+                                <th>Cancellation reason</th>
+                                <th>Details</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="mission : ${taskBoard.cancelledMissions}">
+                                <td>
+                                    <div class="fw-semibold" th:text="${mission.requestCode}">REQ-CANCELLED</div>
+                                    <div class="text-secondary small" th:text="${mission.assignedRobotName != null ? mission.assignedRobotName : 'No robot assigned'}">Picker Alpha</div>
+                                    <div class="small">
+                                        <span th:text="${mission.cargoType}">Small Cargo</span>
+                                        <span class="text-secondary">/</span>
+                                        <span th:text="${mission.zone}">Zone A</span>
+                                        <span class="text-secondary">/</span>
+                                        <span class="code-text" th:text="${mission.locationCode}">A1</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="status-badge"
+                                          th:classappend="${mission.statusBadgeClass}"
+                                          th:text="${mission.status}">CANCELLED</span>
+                                </td>
+                                <td>
+                                    <div th:text="${mission.cancellationReasonDisplay}"
+                                         th:data-i18n-text="${mission.cancellationReasonDisplay}">Wrong location</div>
+                                    <div class="text-secondary small" th:if="${mission.cancelledAt != null}">
+                                        <span data-i18n="cancelledAt">Cancelled at</span>
+                                        <span class="code-text" th:text="${mission.cancelledAtDisplay}">2026-06-16 10:00</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <details class="technical-details">
+                                        <summary data-i18n="details">Details</summary>
+                                        <div class="metric-label" data-i18n="cancelledBy">Cancelled by</div>
+                                        <div class="small mb-2" th:text="${mission.cancelledByDisplay}">Nova001</div>
+                                        <div class="metric-label" data-i18n="cancellationNote">Cancellation note</div>
+                                        <div class="small text-secondary" th:text="${mission.cancellationNoteDisplay}">No cancellation note provided.</div>
+                                    </details>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+<script th:src="@{/js/app-notifications.js}" defer></script>
+</body>
+</html>

@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Warehouse Decision Engine Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script th:src="@{/js/app-settings.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div class="app-layout">
+    <aside th:replace="~{fragments/sidebar :: sidebar('dashboard')}"></aside>
+
+    <div class="workspace">
+        <header class="top-bar">
+            <h1 class="h4 fw-bold mb-0">Dashboard</h1>
+            <div th:replace="~{fragments/topbar-controls :: topbarControls}"></div>
+        </header>
+
+        <main class="page-canvas">
+            <section class="d-flex flex-column flex-lg-row justify-content-between gap-3 mb-4">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="status-badge status-default">Admin</span>
+                        <span class="status-badge status-moving">Overview</span>
+                    </div>
+                    <h2 class="h2 fw-bold mb-1">Warehouse Overview</h2>
+                    <p class="text-secondary mb-0">Monitor fleet health, active missions, rules, and recent engine decisions.</p>
+                </div>
+                <div class="button-cluster align-items-start">
+                    <a class="btn btn-primary d-flex align-items-center gap-2" th:href="@{/simulation}">
+                        <span class="material-symbols-outlined fs-5">play_circle</span>
+                        Run Simulator
+                    </a>
+                    <a class="btn btn-outline-primary d-flex align-items-center gap-2" th:href="@{/staff/missions}">
+                        <span class="material-symbols-outlined fs-5">fact_check</span>
+                        View Missions
+                    </a>
+                </div>
+            </section>
+
+            <section class="row g-4 mb-4">
+                <div class="col-12 col-md-6 col-xl-3">
+                    <div class="metric-card p-3 h-100 d-flex align-items-center gap-3">
+                        <span class="metric-icon"><span class="material-symbols-outlined">precision_manufacturing</span></span>
+                        <div>
+                            <div class="metric-label">Robots</div>
+                            <div class="metric-value" th:text="${summary.robotCount}">0</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-3">
+                    <div class="metric-card p-3 h-100 d-flex align-items-center gap-3">
+                        <span class="metric-icon"><span class="material-symbols-outlined">assignment_turned_in</span></span>
+                        <div>
+                            <div class="metric-label">Active Missions</div>
+                            <div class="metric-value" th:text="${summary.activeMissionCount}">0</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-3">
+                    <div class="metric-card p-3 h-100 d-flex align-items-center gap-3">
+                        <span class="metric-icon"><span class="material-symbols-outlined">rule</span></span>
+                        <div>
+                            <div class="metric-label">Active Rules</div>
+                            <div class="metric-value" th:text="${summary.activeRuleCount}">0</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-3">
+                    <div class="metric-card p-3 h-100 d-flex align-items-center gap-3">
+                        <span class="metric-icon"><span class="material-symbols-outlined">history</span></span>
+                        <div>
+                            <div class="metric-label">Recent History</div>
+                            <div class="metric-value" th:text="${recentExecutionHistory != null ? #lists.size(recentExecutionHistory) : 0}">0</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="row g-4 mb-4">
+                <div class="col-12 col-xl-5">
+                    <div class="stitch-card h-100">
+                        <div class="card-title-row justify-content-between">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="material-symbols-outlined">smart_toy</span>
+                                <h2 class="h5 fw-semibold mb-0">Fleet Snapshot</h2>
+                            </div>
+                            <a class="text-decoration-none fw-semibold" th:href="@{/robots}">Robots</a>
+                        </div>
+                        <div class="p-3 d-flex flex-column gap-3">
+                            <article class="technical-detail-box" th:each="robot : ${robots}">
+                                <div class="d-flex align-items-start justify-content-between gap-3 mb-2">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="robot-icon"><span class="material-symbols-outlined">smart_toy</span></span>
+                                        <div>
+                                            <div class="fw-semibold" th:text="${robot.name}">Picker Alpha</div>
+                                            <div class="code-text text-secondary" th:text="${robot.code}">RB-100</div>
+                                        </div>
+                                    </div>
+                                    <span class="status-badge"
+                                          th:classappend="${robot.status == 'IDLE'} ? ' status-idle' : (${robot.status == 'MOVING'} ? ' status-moving' : (${robot.status == 'LOADED'} ? ' status-loaded' : (${robot.status == 'CHARGING'} ? ' status-charging' : ' status-default')))"
+                                          th:text="${robot.status}">IDLE</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="metric-label">Battery</span>
+                                    <span class="code-text" th:text="${robot.battery != null ? robot.battery + '%' : 'N/A'}">68%</span>
+                                </div>
+                                <div class="battery-track mb-2">
+                                    <div class="battery-bar"
+                                         th:classappend="${robot.status == 'CHARGING'} ? ' charging' : (${robot.battery != null and robot.battery < 20} ? ' low' : '')"
+                                         th:style="${robot.battery != null ? 'width: ' + robot.battery + '%;' : 'width: 0%;'}"></div>
+                                </div>
+                                <div class="d-flex justify-content-between gap-2">
+                                    <span class="metric-label">Strategy</span>
+                                    <span class="strategy-chip code-text text-end"
+                                          th:text="${robot.currentStrategy != null ? robot.currentStrategy.className : 'NoStrategy'}">EnergySavingStrategy</span>
+                                </div>
+                            </article>
+                            <div class="empty-state" th:if="${#lists.isEmpty(robots)}">
+                                No robots have been registered yet.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-xl-7">
+                    <div class="stitch-card h-100">
+                        <div class="card-title-row justify-content-between">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="material-symbols-outlined">history</span>
+                                <h2 class="h5 fw-semibold mb-0">Recent Execution History</h2>
+                            </div>
+                            <a class="text-decoration-none fw-semibold" th:href="@{/simulation}">Simulation</a>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table compact-table align-middle mb-0">
+                                <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Robot</th>
+                                    <th>Rule</th>
+                                    <th>Strategy</th>
+                                    <th>Action</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="history : ${recentExecutionHistory}">
+                                    <td class="code-text" th:text="${#temporals.format(history.executedAt, 'yyyy-MM-dd HH:mm')}">2026-05-19 09:30</td>
+                                    <td>
+                                        <div class="fw-semibold" th:text="${history.robotName}">Simulation Robot</div>
+                                        <div class="code-text text-secondary" th:text="${history.robotCode}">SIM-001</div>
+                                    </td>
+                                    <td>
+                                        <div th:text="${history.matchedRuleName}">Low Battery Rule</div>
+                                        <details class="technical-details mt-2" th:if="${history.matchedConditionExpression != null}">
+                                            <summary>Condition</summary>
+                                            <span class="code-text" th:text="${history.matchedConditionExpression}">battery &lt; 20</span>
+                                        </details>
+                                    </td>
+                                    <td><span class="strategy-chip code-text" th:text="${history.selectedStrategy}">ChargingStrategy</span></td>
+                                    <td><span class="small text-secondary" th:text="${history.actionMessage}">Robot action.</span></td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(recentExecutionHistory)}">
+                                    <td colspan="5"><div class="empty-state">No simulation executions have been saved yet.</div></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="stitch-card">
+                <details class="trace-details">
+                    <summary>
+                        <span class="d-flex align-items-center gap-2">
+                            <span class="material-symbols-outlined text-primary">settings_suggest</span>
+                            <span class="h5 fw-semibold mb-0">Technical Catalog</span>
+                        </span>
+                        <span class="status-badge status-default">Rules and Strategies</span>
+                    </summary>
+                    <div class="row g-4 p-3">
+                        <div class="col-12 col-xl-7">
+                            <h3 class="h6 fw-semibold mb-3">Active Rules</h3>
+                            <div class="table-responsive">
+                                <table class="table compact-table align-middle mb-0">
+                                    <thead>
+                                    <tr>
+                                        <th>Priority</th>
+                                        <th>Rule</th>
+                                        <th>Condition</th>
+                                        <th>Strategy</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="rule : ${activeRules}">
+                                        <td><span class="status-badge status-default" th:text="${rule.priority}">1</span></td>
+                                        <td><span class="fw-semibold" th:text="${rule.ruleName}">Low Battery Rule</span></td>
+                                        <td><span class="rule-condition-pill code-text" th:text="${rule.conditionExpression}">battery &lt; 20</span></td>
+                                        <td><span class="strategy-chip code-text" th:text="${rule.strategyName}">ChargingStrategy</span></td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(activeRules)}">
+                                        <td colspan="4"><div class="empty-state">No active rules are available.</div></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-xl-5">
+                            <h3 class="h6 fw-semibold mb-3">Active Strategies</h3>
+                            <div class="d-flex flex-column gap-2">
+                                <div class="condition-row" th:each="strategy : ${activeStrategies}">
+                                    <div>
+                                        <div class="fw-semibold" th:text="${strategy.name}">Charging Strategy</div>
+                                        <div class="small text-secondary" th:text="${strategy.description}">Route robots to charging.</div>
+                                    </div>
+                                    <span class="strategy-chip code-text" th:text="${strategy.className}">ChargingStrategy</span>
+                                </div>
+                                <div class="empty-state" th:if="${#lists.isEmpty(activeStrategies)}">No active strategies are available.</div>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+            </section>
+        </main>
+    </div>
+</div>
+<script th:src="@{/js/app-notifications.js}" defer></script>
+</body>
+</html>

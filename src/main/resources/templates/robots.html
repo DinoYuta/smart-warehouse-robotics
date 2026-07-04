@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Robot Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script th:src="@{/js/app-settings.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div class="app-layout">
+    <aside th:replace="~{fragments/sidebar :: sidebar('robots')}"></aside>
+
+    <div class="workspace">
+        <header class="top-bar">
+            <div class="fw-bold text-primary">Decision Engine</div>
+            <div th:replace="~{fragments/topbar-controls :: topbarControls}"></div>
+        </header>
+
+        <main class="page-canvas">
+            <section class="d-flex flex-column flex-lg-row justify-content-between gap-3 mb-4">
+                <div>
+                    <h1 class="h2 fw-bold mb-1">Robot Fleet</h1>
+                    <p class="text-secondary mb-0">Monitor robot availability, battery, charging state, and current strategy.</p>
+                </div>
+                <div class="d-flex align-items-start">
+                    <a class="btn btn-primary d-flex align-items-center gap-2" th:href="@{/simulation}">
+                        <span class="material-symbols-outlined fs-5">play_circle</span>
+                        Open Simulator
+                    </a>
+                </div>
+            </section>
+
+            <section class="row g-4" th:if="${!#lists.isEmpty(robotFleet)}">
+                <div class="col-12 col-md-6 col-xl-4" th:each="fleetItem : ${robotFleet}">
+                    <article class="robot-card stitch-card p-3"
+                             th:with="robot=${fleetItem.robot}, batteryStatus=${fleetItem.batteryStatus}, lowBattery=${fleetItem.lowBattery}, criticalBattery=${fleetItem.criticalBattery}, charging=${fleetItem.charging}, obstacle=${robot.obstacleDetected == true}, batteryDisplay=${fleetItem.batteryDisplayText}, batteryPercent=${fleetItem.batteryPercent}, batteryMessage=${fleetItem.batteryMessage}">
+                        <header class="robot-card-header align-items-start gap-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="robot-icon"><span class="material-symbols-outlined">smart_toy</span></span>
+                                <div>
+                                    <h2 class="h5 fw-semibold mb-0" th:text="${robot.name}">Robot Name</h2>
+                                    <div class="code-text text-secondary" th:text="${robot.code}">ROBOT-CODE</div>
+                                </div>
+                            </div>
+                            <span class="status-badge"
+                                  th:classappend="${fleetItem.statusBadgeClass}"
+                                  th:text="${fleetItem.statusLabel}">STATUS</span>
+                        </header>
+
+                        <div>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="metric-label">Power Level</span>
+                                <span class="code-text"
+                                      th:classappend="${lowBattery or charging} ? ' text-danger fw-semibold' : ''"
+                                      th:text="${batteryDisplay}">N/A</span>
+                            </div>
+                            <div class="battery-track">
+                                <div class="battery-bar"
+                                     th:classappend="${charging} ? ' charging' : (${lowBattery} ? ' low' : '')"
+                                     th:style="${'width: ' + batteryPercent + '%;'}"></div>
+                            </div>
+                            <div class="battery-compact-message mt-1"
+                                 th:if="${charging or fleetItem.batteryWarningLevel != 'NORMAL'}"
+                                 th:text="${charging ? 'Charging at station.' : (criticalBattery ? 'Charging required after this task.' : batteryMessage)}">Battery status message.</div>
+                        </div>
+
+                        <div class="metric-list">
+                            <div class="metric-list-row">
+                                <span class="metric-label">Status</span>
+                                <span th:text="${fleetItem.statusLabel}">STATUS</span>
+                            </div>
+                            <div class="metric-list-row">
+                                <span class="metric-label">Current Strategy</span>
+                                <span class="text-end">
+                                    <span class="strategy-chip code-text"
+                                          th:text="${fleetItem.currentStrategyDisplay}">Idle</span>
+                                    <span class="d-block text-secondary small mt-1"
+                                          th:if="${fleetItem.primaryStrategyDifferent}"
+                                          th:text="${'Primary: ' + fleetItem.primaryStrategyDisplay}">Primary: FastRouteStrategy</span>
+                                    <span class="d-block text-secondary small mt-1"
+                                          th:if="${fleetItem.movementModeDisplayText != ''}"
+                                          th:text="${fleetItem.movementModeDisplayText}">Fast Mode</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <details class="technical-details">
+                            <summary>Technical details</summary>
+                            <div class="robot-technical-grid">
+                                <div class="technical-detail-box">
+                                    <div class="metric-label">Obstacle</div>
+                                    <div th:text="${robot.obstacleDetected == true ? 'Detected' : 'Clear'}">Clear</div>
+                                </div>
+                                <div class="technical-detail-box">
+                                    <div class="metric-label">Robot Load</div>
+                                    <div th:text="${robot.robotLoad != null ? robot.robotLoad + '%' : 'N/A'}">N/A</div>
+                                </div>
+                                <div class="technical-detail-box">
+                                    <div class="metric-label">Distance</div>
+                                    <div th:text="${robot.distance != null ? robot.distance + 'm' : 'N/A'}">N/A</div>
+                                </div>
+                                <div class="technical-detail-box">
+                                    <div class="metric-label">Priority</div>
+                                    <div th:text="${robot.priority != null ? robot.priority : 'N/A'}">N/A</div>
+                                </div>
+                            </div>
+                        </details>
+
+                        <footer class="border-top pt-3 mt-auto d-flex justify-content-end">
+                            <a class="text-decoration-none fw-semibold d-flex align-items-center gap-1" th:href="@{/simulation}">
+                                <span class="material-symbols-outlined fs-6">play_arrow</span>
+                                Simulate This Robot
+                            </a>
+                        </footer>
+                    </article>
+                </div>
+            </section>
+
+            <section class="stitch-card" th:if="${#lists.isEmpty(robotFleet)}">
+                <div class="empty-state">No robots found. Seed data may not be loaded yet.</div>
+            </section>
+        </main>
+    </div>
+</div>
+<script th:src="@{/js/app-notifications.js}" defer></script>
+</body>
+</html>

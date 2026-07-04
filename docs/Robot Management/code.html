@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Robot Management - Decision Engine</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-primary-container": "#fefcff",
+                        "inverse-surface": "#27313f",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-high": "#dee9fc",
+                        "primary-container": "#2170e4",
+                        "on-secondary-fixed-variant": "#444749",
+                        "on-error-container": "#93000a",
+                        "on-error": "#ffffff",
+                        "secondary-fixed": "#e1e2e4",
+                        "on-secondary-fixed": "#191c1e",
+                        "secondary": "#5c5f60",
+                        "primary-fixed": "#d8e2ff",
+                        "surface": "#f8f9ff",
+                        "surface-container": "#e6eeff",
+                        "inverse-primary": "#adc6ff",
+                        "on-primary-fixed-variant": "#004395",
+                        "background": "#f8f9ff",
+                        "tertiary-fixed-dim": "#ffb786",
+                        "outline": "#727785",
+                        "outline-variant": "#c2c6d6",
+                        "surface-variant": "#d9e3f6",
+                        "on-secondary-container": "#606365",
+                        "on-primary": "#ffffff",
+                        "secondary-container": "#dee0e2",
+                        "on-surface-variant": "#424754",
+                        "tertiary-container": "#b75b00",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed": "#311400",
+                        "surface-tint": "#005ac2",
+                        "primary": "#0058be",
+                        "surface-bright": "#f8f9ff",
+                        "tertiary": "#924700",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed": "#ffdcc6",
+                        "on-tertiary-container": "#fffbff",
+                        "on-secondary": "#ffffff",
+                        "surface-dim": "#d0dbed",
+                        "primary-fixed-dim": "#adc6ff",
+                        "on-primary-fixed": "#001a42",
+                        "on-tertiary-fixed-variant": "#723600",
+                        "secondary-fixed-dim": "#c5c6c8",
+                        "error": "#ba1a1a",
+                        "on-background": "#121c2a",
+                        "on-surface": "#121c2a",
+                        "surface-container-highest": "#d9e3f6",
+                        "surface-container-low": "#eff4ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "container-max": "1200px",
+                        "base": "4px",
+                        "sm": "8px",
+                        "md": "16px",
+                        "gutter": "24px",
+                        "lg": "24px",
+                        "xl": "40px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter", "sans-serif"],
+                        "code": ["monospace"],
+                        "headline-sm": ["Inter", "sans-serif"],
+                        "label-md": ["Inter", "sans-serif"],
+                        "body-md": ["Inter", "sans-serif"],
+                        "headline-lg": ["Inter", "sans-serif"],
+                        "body-sm": ["Inter", "sans-serif"],
+                        "headline-md": ["Inter", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "code": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-lg": ["30px", {"lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-on-background flex h-screen overflow-hidden">
+<!-- SideNavBar (Semantic Shell) -->
+<nav class="hidden md:flex fixed left-0 top-0 h-full w-64 bg-surface-container-low border-r border-outline-variant flex-col py-lg z-20">
+<div class="px-md mb-lg">
+<h1 class="font-headline-sm text-headline-sm font-semibold text-on-surface">Warehouse Engine</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Decision Control System</p>
+</div>
+<div class="flex-1 flex flex-col gap-xs overflow-y-auto mt-sm">
+<!-- Dashboard (Inactive) -->
+<a class="flex items-center px-md py-sm text-on-surface-variant hover:bg-surface-variant transition-all duration-200 ease-in-out group" href="#">
+<span class="material-symbols-outlined mr-sm group-hover:text-on-surface">dashboard</span>
+<span class="font-label-md text-label-md group-hover:text-on-surface">Dashboard</span>
+</a>
+<!-- Rule Management (Inactive) -->
+<a class="flex items-center px-md py-sm text-on-surface-variant hover:bg-surface-variant transition-all duration-200 ease-in-out group" href="#">
+<span class="material-symbols-outlined mr-sm group-hover:text-on-surface">rule</span>
+<span class="font-label-md text-label-md group-hover:text-on-surface">Rule Management</span>
+</a>
+<!-- Robot Management (Active) -->
+<a class="flex items-center px-md py-sm text-primary font-bold border-r-4 border-primary bg-surface transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined mr-sm" style="font-variation-settings: 'FILL' 1;">precision_manufacturing</span>
+<span class="font-label-md text-label-md">Robot Management</span>
+</a>
+<!-- Execution Simulator (Inactive) -->
+<a class="flex items-center px-md py-sm text-on-surface-variant hover:bg-surface-variant transition-all duration-200 ease-in-out group" href="#">
+<span class="material-symbols-outlined mr-sm group-hover:text-on-surface">play_circle</span>
+<span class="font-label-md text-label-md group-hover:text-on-surface">Execution Simulator</span>
+</a>
+<!-- System Flow (Inactive) -->
+<a class="flex items-center px-md py-sm text-on-surface-variant hover:bg-surface-variant transition-all duration-200 ease-in-out group" href="#">
+<span class="material-symbols-outlined mr-sm group-hover:text-on-surface">account_tree</span>
+<span class="font-label-md text-label-md group-hover:text-on-surface">System Flow</span>
+</a>
+</div>
+<div class="mt-auto flex flex-col gap-xs pt-md border-t border-outline-variant px-xs">
+<a class="flex items-center px-md py-sm text-on-surface-variant hover:bg-surface-variant transition-all duration-200 ease-in-out group" href="#">
+<span class="material-symbols-outlined mr-sm group-hover:text-on-surface">menu_book</span>
+<span class="font-label-md text-label-md group-hover:text-on-surface">Documentation</span>
+</a>
+<a class="flex items-center px-md py-sm text-on-surface-variant hover:bg-surface-variant transition-all duration-200 ease-in-out group" href="#">
+<span class="material-symbols-outlined mr-sm group-hover:text-on-surface">help</span>
+<span class="font-label-md text-label-md group-hover:text-on-surface">Help</span>
+</a>
+</div>
+</nav>
+<!-- Main Workspace -->
+<div class="flex-1 flex flex-col md:ml-64 w-full">
+<!-- TopAppBar -->
+<header class="bg-surface border-b border-outline-variant flex justify-between items-center h-16 px-gutter w-full shrink-0 z-10">
+<div class="flex items-center">
+<span class="md:hidden material-symbols-outlined mr-md text-on-surface cursor-pointer">menu</span>
+<h2 class="font-headline-md text-headline-md font-bold text-primary">Decision Engine</h2>
+</div>
+<div class="flex items-center gap-sm">
+<button class="p-2 text-on-surface-variant hover:bg-surface-variant rounded-full transition-colors duration-200 flex items-center justify-center">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:bg-surface-variant rounded-full transition-colors duration-200 flex items-center justify-center">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="h-8 w-8 rounded-full ml-sm border border-outline-variant overflow-hidden bg-surface-container-high flex items-center justify-center">
+<img alt="User profile" class="w-full h-full object-cover" data-alt="A clean, minimalist corporate headshot of a male professional against a subtle light gray background. The lighting is soft and even, highlighting a friendly yet serious expression suitable for an academic or technical enterprise setting. The image uses a cool, high-key palette that perfectly complements a modern light-mode interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCKDK3vZgXgv8iT-Hdy5G5xiNmREe6kZF1GY0nKJso95Nvx_ahJjqUEf3q13YLMl2VqVJTOZY_3QZPJrg1xgR1SWlxUMKQZB5sOaspBB6PFsL8buMUWzEfbaY5u0efd8EGqWdV78syByEoTTjA95s23qoAFFo5q0fdyNOUuPhXo2q128HW5IGFV5tapmoBvf9MWjRcrKUJBlyGSkRiTvOFX0rwj1Y6rOu4WvxRWXgX3VtAhYfnmIX4akeZJLL1H3HSgehqDh5VDTrw"/>
+</div>
+</div>
+</header>
+<!-- Page Canvas -->
+<main class="flex-1 overflow-y-auto p-md lg:p-lg">
+<div class="max-w-container-max mx-auto">
+<!-- Page Header -->
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-lg gap-md">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Robot Fleet</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-xs">Monitor and manage automated warehouse units.</p>
+</div>
+<div class="flex gap-sm w-full sm:w-auto">
+<button class="flex-1 sm:flex-none bg-surface-container-lowest border border-outline-variant text-on-surface px-md py-sm rounded-lg font-label-md text-label-md hover:bg-surface-variant transition-colors flex items-center justify-center gap-xs">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+                            Filter
+                        </button>
+<button class="flex-1 sm:flex-none bg-primary text-on-primary px-md py-sm rounded-lg font-label-md text-label-md hover:bg-surface-tint transition-colors flex items-center justify-center gap-xs">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                            Provision Unit
+                        </button>
+</div>
+</div>
+<!-- Robot Cards Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-md lg:gap-lg">
+<!-- Card 1: Low Battery (Example from Prompt) -->
+<article class="bg-surface-container-lowest border border-outline-variant rounded-lg p-md shadow-[0_1px_3px_rgba(0,0,0,0.05)] hover:border-outline transition-colors flex flex-col">
+<header class="flex justify-between items-center border-b border-surface-container pb-sm mb-md">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary bg-primary-container/20 p-xs rounded-md">smart_toy</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface m-0">Robot A01</h3>
+</div>
+<span class="inline-flex items-center px-2 py-1 rounded-full font-label-md text-label-md bg-error-container text-on-error-container text-[12px] uppercase tracking-wider font-semibold">
+                                Low Battery
+                            </span>
+</header>
+<div class="flex flex-col gap-md flex-1">
+<!-- Battery Indicator -->
+<div class="flex flex-col gap-xs">
+<div class="flex justify-between items-end">
+<span class="font-label-md text-label-md text-on-surface-variant">Power Level</span>
+<span class="font-code text-code text-error font-medium">18%</span>
+</div>
+<div class="w-full h-2 bg-secondary-container rounded-full overflow-hidden">
+<div class="h-full bg-error" style="width: 18%;"></div>
+</div>
+</div>
+<!-- Metrics -->
+<div class="flex flex-col gap-sm mt-auto bg-surface p-sm rounded border border-surface-container">
+<div class="flex justify-between items-center border-b border-surface-variant pb-xs">
+<span class="font-label-md text-label-md text-on-surface-variant">Current Task</span>
+<span class="font-body-sm text-body-sm text-on-surface text-right">None</span>
+</div>
+<div class="flex justify-between items-center border-b border-surface-variant pb-xs">
+<span class="font-label-md text-label-md text-on-surface-variant">Active Strategy</span>
+<span class="font-code text-code text-primary-container text-right bg-primary-container/10 px-1 rounded">ChargingStrategy</span>
+</div>
+<div class="flex justify-between items-start pt-xs">
+<span class="font-label-md text-label-md text-on-surface-variant shrink-0 mr-md">Status</span>
+<span class="font-body-sm text-body-sm text-on-surface text-right">Returning to charging station</span>
+</div>
+</div>
+</div>
+<footer class="mt-md pt-md border-t border-surface-container flex justify-end">
+<button class="font-label-md text-label-md text-primary hover:text-surface-tint transition-colors">View Logs</button>
+</footer>
+</article>
+<!-- Card 2: Active -->
+<article class="bg-surface-container-lowest border border-outline-variant rounded-lg p-md shadow-[0_1px_3px_rgba(0,0,0,0.05)] hover:border-outline transition-colors flex flex-col">
+<header class="flex justify-between items-center border-b border-surface-container pb-sm mb-md">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary bg-primary-container/20 p-xs rounded-md">smart_toy</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface m-0">Robot B42</h3>
+</div>
+<span class="inline-flex items-center px-2 py-1 rounded-full font-label-md text-label-md bg-surface-container-high text-primary text-[12px] uppercase tracking-wider font-semibold">
+                                Active
+                            </span>
+</header>
+<div class="flex flex-col gap-md flex-1">
+<!-- Battery Indicator -->
+<div class="flex flex-col gap-xs">
+<div class="flex justify-between items-end">
+<span class="font-label-md text-label-md text-on-surface-variant">Power Level</span>
+<span class="font-code text-code text-on-surface font-medium">84%</span>
+</div>
+<div class="w-full h-2 bg-secondary-container rounded-full overflow-hidden">
+<div class="h-full bg-primary" style="width: 84%;"></div>
+</div>
+</div>
+<!-- Metrics -->
+<div class="flex flex-col gap-sm mt-auto bg-surface p-sm rounded border border-surface-container">
+<div class="flex justify-between items-center border-b border-surface-variant pb-xs">
+<span class="font-label-md text-label-md text-on-surface-variant">Current Task</span>
+<span class="font-body-sm text-body-sm text-on-surface text-right">Retrieve Aisle 4</span>
+</div>
+<div class="flex justify-between items-center border-b border-surface-variant pb-xs">
+<span class="font-label-md text-label-md text-on-surface-variant">Active Strategy</span>
+<span class="font-code text-code text-primary-container text-right bg-primary-container/10 px-1 rounded">PathOptimizedFetch</span>
+</div>
+<div class="flex justify-between items-start pt-xs">
+<span class="font-label-md text-label-md text-on-surface-variant shrink-0 mr-md">Status</span>
+<span class="font-body-sm text-body-sm text-on-surface text-right">In transit to target coordinates</span>
+</div>
+</div>
+</div>
+<footer class="mt-md pt-md border-t border-surface-container flex justify-end">
+<button class="font-label-md text-label-md text-primary hover:text-surface-tint transition-colors">View Logs</button>
+</footer>
+</article>
+<!-- Card 3: Idle -->
+<article class="bg-surface-container-lowest border border-outline-variant rounded-lg p-md shadow-[0_1px_3px_rgba(0,0,0,0.05)] hover:border-outline transition-colors flex flex-col">
+<header class="flex justify-between items-center border-b border-surface-container pb-sm mb-md">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-secondary bg-surface-variant p-xs rounded-md">smart_toy</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface m-0">Robot C11</h3>
+</div>
+<span class="inline-flex items-center px-2 py-1 rounded-full font-label-md text-label-md bg-secondary-container text-on-secondary-container text-[12px] uppercase tracking-wider font-semibold">
+                                Idle
+                            </span>
+</header>
+<div class="flex flex-col gap-md flex-1">
+<!-- Battery Indicator -->
+<div class="flex flex-col gap-xs">
+<div class="flex justify-between items-end">
+<span class="font-label-md text-label-md text-on-surface-variant">Power Level</span>
+<span class="font-code text-code text-on-surface font-medium">100%</span>
+</div>
+<div class="w-full h-2 bg-secondary-container rounded-full overflow-hidden">
+<div class="h-full bg-primary" style="width: 100%;"></div>
+</div>
+</div>
+<!-- Metrics -->
+<div class="flex flex-col gap-sm mt-auto bg-surface p-sm rounded border border-surface-container">
+<div class="flex justify-between items-center border-b border-surface-variant pb-xs">
+<span class="font-label-md text-label-md text-on-surface-variant">Current Task</span>
+<span class="font-body-sm text-body-sm text-on-surface text-right">None</span>
+</div>
+<div class="flex justify-between items-center border-b border-surface-variant pb-xs">
+<span class="font-label-md text-label-md text-on-surface-variant">Active Strategy</span>
+<span class="font-code text-code text-secondary text-right bg-secondary-container/30 px-1 rounded">StandbyMode</span>
+</div>
+<div class="flex justify-between items-start pt-xs">
+<span class="font-label-md text-label-md text-on-surface-variant shrink-0 mr-md">Status</span>
+<span class="font-body-sm text-body-sm text-on-surface text-right">Awaiting dispatch instructions</span>
+</div>
+</div>
+</div>
+<footer class="mt-md pt-md border-t border-surface-container flex justify-end">
+<button class="font-label-md text-label-md text-primary hover:text-surface-tint transition-colors">View Logs</button>
+</footer>
+</article>
+</div>
+</div>
+</main>
+</div>
+</body></html>

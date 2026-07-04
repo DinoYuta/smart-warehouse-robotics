@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Live Warehouse Map Demo</title>
+  <link rel="stylesheet" href="live-map.css">
+</head>
+<body>
+  <div class="live-map-page">
+    <header class="map-header glass-panel" aria-label="Live warehouse map header">
+      <div>
+        <h1>LIVE WAREHOUSE MAP</h1>
+      </div>
+      <div class="live-status" aria-label="Live status">
+        <span class="live-dot" aria-hidden="true"></span>
+        <span>LIVE</span>
+      </div>
+    </header>
+
+    <div class="dashboard-grid">
+      <aside class="left-sidebar panel-stack" aria-label="Map controls and legend">
+        <section class="panel legend-panel" aria-labelledby="legend-title">
+          <h2 id="legend-title" class="panel-title">LEGEND</h2>
+          <ul class="legend-list">
+            <li class="legend-item">
+              <span>Robot</span>
+              <span class="legend-symbol robot-symbol" aria-hidden="true"></span>
+            </li>
+            <li class="legend-item">
+              <span>Small Cargo</span>
+              <span class="cargo-dot cargo-small" aria-hidden="true"></span>
+            </li>
+            <li class="legend-item">
+              <span>Medium Cargo</span>
+              <span class="cargo-dot cargo-medium" aria-hidden="true"></span>
+            </li>
+            <li class="legend-item">
+              <span>Large Cargo</span>
+              <span class="cargo-dot cargo-large" aria-hidden="true"></span>
+            </li>
+            <li class="legend-item">
+              <span>Route Network</span>
+              <span class="route-sample route-network" aria-hidden="true"></span>
+            </li>
+            <li class="legend-item">
+              <span>Active Route</span>
+              <span class="route-sample active-route" aria-hidden="true"></span>
+            </li>
+          </ul>
+        </section>
+
+        <section class="panel zones-panel" aria-labelledby="zones-title">
+          <h2 id="zones-title" class="panel-title">ZONES</h2>
+          <div class="zone-buttons" role="group" aria-label="Select warehouse zone">
+            <button class="zone-button is-active" type="button" data-zone-target="a">
+              <span class="zone-swatch zone-swatch-a" aria-hidden="true"></span>
+              <span>ZONE A</span>
+            </button>
+            <button class="zone-button" type="button" data-zone-target="b">
+              <span class="zone-swatch zone-swatch-b" aria-hidden="true"></span>
+              <span>ZONE B</span>
+            </button>
+            <button class="zone-button" type="button" data-zone-target="c">
+              <span class="zone-swatch zone-swatch-c" aria-hidden="true"></span>
+              <span>ZONE C</span>
+            </button>
+          </div>
+        </section>
+      </aside>
+
+      <main class="warehouse-shell" aria-label="Standalone live warehouse map demo">
+        <section class="warehouse-board" aria-label="Warehouse board with active zone, routes, and stations">
+          <div class="board-scan" aria-hidden="true"></div>
+
+          <div class="board-toolbar" aria-label="Demo route controls">
+            <p id="zone-status" class="zone-status" aria-live="polite">Robot currently viewing Zone A</p>
+            <div class="demo-actions">
+              <button id="next-zone-button" class="demo-button" type="button">Next Zone</button>
+              <button id="start-route-button" class="demo-button demo-button-primary" type="button">Start Demo Route</button>
+            </div>
+          </div>
+
+          <div id="active-zone-map" class="active-zone-map" aria-live="polite"></div>
+
+          <div id="station-row" class="station-row is-hidden" hidden aria-label="Zone C station area">
+            <div class="station base-station">
+              <span class="station-core base-core" aria-hidden="true"></span>
+              <div>
+                <strong>BASE STATION</strong>
+                <span>Robot home dock</span>
+              </div>
+            </div>
+            <div class="station charging-station">
+              <span class="station-core charge-core" aria-hidden="true">
+                <span class="charge-bolt"></span>
+              </span>
+              <div>
+                <strong>CHARGING STATION</strong>
+                <span>Energy recovery</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <aside class="right-sidebar panel-stack" aria-label="Mission flow and cargo guide">
+        <section class="panel mission-flow" aria-labelledby="mission-flow-title">
+          <div class="mission-header">
+            <h2 id="mission-flow-title" class="panel-title">MISSION FLOW</h2>
+          </div>
+          <ol class="flow-track">
+            <li><button class="flow-step" type="button"><span class="step-index">01</span><span>Command Received</span></button></li>
+            <li><button class="flow-step" type="button"><span class="step-index">02</span><span>Route Planned</span></button></li>
+            <li><button class="flow-step is-active" type="button"><span class="step-index">03</span><span>Navigating to Target</span></button></li>
+            <li><button class="flow-step" type="button"><span class="step-index">04</span><span>Picking up Cargo</span></button></li>
+            <li><button class="flow-step" type="button"><span class="step-index">05</span><span>Returning to Base</span></button></li>
+            <li><button class="flow-step" type="button"><span class="step-index">06</span><span>Mission Completed</span></button></li>
+          </ol>
+        </section>
+
+        <section class="panel cargo-guide-panel" aria-labelledby="cargo-guide-title">
+          <h2 id="cargo-guide-title" class="panel-title">CARGO GUIDE</h2>
+          <ul class="cargo-guide-list">
+            <li class="cargo-guide-row">
+              <span>SMALL CARGO</span>
+              <span class="cargo-dot cargo-small" aria-hidden="true"></span>
+              <strong>Zone A</strong>
+            </li>
+            <li class="cargo-guide-row">
+              <span>MEDIUM CARGO</span>
+              <span class="cargo-dot cargo-medium" aria-hidden="true"></span>
+              <strong>Zone B</strong>
+            </li>
+            <li class="cargo-guide-row">
+              <span>LARGE CARGO</span>
+              <span class="cargo-dot cargo-large" aria-hidden="true"></span>
+              <strong>Zone C</strong>
+            </li>
+          </ul>
+        </section>
+      </aside>
+    </div>
+  </div>
+
+  <script src="live-map.js" defer></script>
+</body>
+</html>

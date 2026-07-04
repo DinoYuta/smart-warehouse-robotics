@@ -1,0 +1,10 @@
+.git
+.gitignore
+.vscode
+.idea
+target
+*.log
+.env
+application-local.properties
+docs
+ai-context

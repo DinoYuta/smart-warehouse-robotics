@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Settings</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script th:src="@{/js/app-settings.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div class="app-layout">
+    <aside th:replace="~{fragments/sidebar :: sidebar('settings')}"></aside>
+
+    <div class="workspace">
+        <header class="top-bar">
+            <div class="fw-bold text-primary" data-i18n="settings">Settings</div>
+            <div th:replace="~{fragments/topbar-controls :: topbarControls}"></div>
+        </header>
+
+        <main class="page-canvas">
+            <section class="d-flex flex-column flex-lg-row justify-content-between gap-3 mb-4">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="status-badge status-default" th:text="${currentRoleLabel != null ? currentRoleLabel : 'USER'}">USER</span>
+                        <span class="status-badge status-moving" data-i18n="settings">Settings</span>
+                    </div>
+                    <h1 class="h2 fw-bold mb-1" data-i18n="settingsTitle">Settings</h1>
+                    <p class="text-secondary mb-0" data-i18n="settingsSubtitle">User-facing preferences for this browser.</p>
+                </div>
+            </section>
+
+            <form class="settings-grid" data-settings-form>
+                <section class="stitch-card settings-card">
+                    <div class="card-title-row">
+                        <span class="material-symbols-outlined">translate</span>
+                        <h2 class="h5 fw-semibold mb-0" data-i18n="language">Language</h2>
+                    </div>
+                    <div class="p-4">
+                        <label class="form-label fw-semibold" for="language-setting" data-i18n="language">Language</label>
+                        <select class="form-select"
+                                id="language-setting"
+                                data-setting-field="language"
+                                aria-label="Language">
+                            <option value="en" data-i18n="english">English</option>
+                            <option value="vi" data-i18n="vietnamese">Tiếng Việt</option>
+                        </select>
+                    </div>
+                </section>
+
+                <section class="stitch-card settings-card">
+                    <div class="card-title-row">
+                        <span class="material-symbols-outlined">contrast</span>
+                        <h2 class="h5 fw-semibold mb-0" data-i18n="theme">Theme</h2>
+                    </div>
+                    <div class="p-4">
+                        <label class="form-label fw-semibold" for="theme-setting" data-i18n="theme">Theme</label>
+                        <select class="form-select"
+                                id="theme-setting"
+                                data-setting-field="theme"
+                                aria-label="Theme">
+                            <option value="light" data-i18n="lightMode">Light mode</option>
+                            <option value="dark" data-i18n="darkMode">Dark mode</option>
+                        </select>
+                    </div>
+                </section>
+
+                <section class="stitch-card settings-card">
+                    <div class="card-title-row">
+                        <span class="material-symbols-outlined">density_medium</span>
+                        <h2 class="h5 fw-semibold mb-0" data-i18n="density">UI Density</h2>
+                    </div>
+                    <div class="p-4">
+                        <label class="form-label fw-semibold" for="density-setting" data-i18n="density">UI Density</label>
+                        <select class="form-select"
+                                id="density-setting"
+                                data-setting-field="density"
+                                aria-label="UI Density">
+                            <option value="comfortable" data-i18n="comfortable">Comfortable</option>
+                            <option value="compact" data-i18n="compact">Compact</option>
+                        </select>
+                    </div>
+                </section>
+
+                <section class="settings-actions">
+                    <button class="btn btn-primary d-inline-flex align-items-center gap-2" type="submit">
+                        <span class="material-symbols-outlined">check_circle</span>
+                        <span data-i18n="applySettings">Apply Settings</span>
+                    </button>
+                    <span class="settings-saved-message" data-settings-saved hidden data-i18n="settingsSaved">Settings applied.</span>
+                    <p class="text-secondary mb-0 small" data-i18n="savedNote">Settings are saved for this browser session/device.</p>
+                </section>
+            </form>
+        </main>
+    </div>
+</div>
+<script th:src="@{/js/app-notifications.js}" defer></script>
+</body>
+</html>

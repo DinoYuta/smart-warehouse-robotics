@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>System Flow - Decision Engine</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-primary-container": "#fefcff",
+                        "inverse-surface": "#27313f",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-high": "#dee9fc",
+                        "primary-container": "#2170e4",
+                        "on-secondary-fixed-variant": "#444749",
+                        "on-error-container": "#93000a",
+                        "on-error": "#ffffff",
+                        "secondary-fixed": "#e1e2e4",
+                        "on-secondary-fixed": "#191c1e",
+                        "secondary": "#5c5f60",
+                        "primary-fixed": "#d8e2ff",
+                        "surface": "#f8f9ff",
+                        "surface-container": "#e6eeff",
+                        "inverse-primary": "#adc6ff",
+                        "on-primary-fixed-variant": "#004395",
+                        "background": "#f8f9ff",
+                        "tertiary-fixed-dim": "#ffb786",
+                        "outline": "#727785",
+                        "outline-variant": "#c2c6d6",
+                        "surface-variant": "#d9e3f6",
+                        "on-secondary-container": "#606365",
+                        "on-primary": "#ffffff",
+                        "secondary-container": "#dee0e2",
+                        "on-surface-variant": "#424754",
+                        "tertiary-container": "#b75b00",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed": "#311400",
+                        "surface-tint": "#005ac2",
+                        "primary": "#0058be",
+                        "surface-bright": "#f8f9ff",
+                        "tertiary": "#924700",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed": "#ffdcc6",
+                        "on-tertiary-container": "#fffbff",
+                        "on-secondary": "#ffffff",
+                        "surface-dim": "#d0dbed",
+                        "primary-fixed-dim": "#adc6ff",
+                        "on-primary-fixed": "#001a42",
+                        "on-tertiary-fixed-variant": "#723600",
+                        "secondary-fixed-dim": "#c5c6c8",
+                        "error": "#ba1a1a",
+                        "on-background": "#121c2a",
+                        "on-surface": "#121c2a",
+                        "surface-container-highest": "#d9e3f6",
+                        "surface-container-low": "#eff4ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "container-max": "1200px",
+                        "base": "4px",
+                        "sm": "8px",
+                        "md": "16px",
+                        "gutter": "24px",
+                        "lg": "24px",
+                        "xl": "40px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "code": ["monospace"],
+                        "headline-sm": ["Inter"],
+                        "label-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "code": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: theme('colors.background'); color: theme('colors.on-background'); }
+    </style>
+</head>
+<body class="flex min-h-screen">
+<!-- SideNavBar -->
+<nav class="bg-surface-container-low dark:bg-inverse-surface fixed left-0 top-0 h-full w-64 border-r border-outline-variant dark:border-outline flex flex-col h-full py-lg z-20 hidden md:flex">
+<div class="px-md mb-xl flex items-center gap-sm">
+<span aria-hidden="true" class="material-symbols-outlined text-primary text-3xl" data-icon="robot_2">robot_2</span>
+<div>
+<h1 class="font-headline-sm text-headline-sm font-semibold text-on-surface dark:text-inverse-on-surface">Warehouse Engine</h1>
+<p class="font-label-md text-label-md text-on-surface-variant">Decision Control System</p>
+</div>
+</div>
+<ul class="flex flex-col gap-sm px-sm flex-grow">
+<li>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant dark:text-surface-variant hover:bg-surface-variant dark:hover:bg-on-surface-variant/10 transition-all duration-200 ease-in-out font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                    Dashboard
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant dark:text-surface-variant hover:bg-surface-variant dark:hover:bg-on-surface-variant/10 transition-all duration-200 ease-in-out font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined" data-icon="rule">rule</span>
+                    Rule Management
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant dark:text-surface-variant hover:bg-surface-variant dark:hover:bg-on-surface-variant/10 transition-all duration-200 ease-in-out font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined" data-icon="precision_manufacturing">precision_manufacturing</span>
+                    Robot Management
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant dark:text-surface-variant hover:bg-surface-variant dark:hover:bg-on-surface-variant/10 transition-all duration-200 ease-in-out font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined" data-icon="play_circle">play_circle</span>
+                    Execution Simulator
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-primary dark:text-inverse-primary font-bold border-r-4 border-primary hover:bg-surface-variant dark:hover:bg-on-surface-variant/10 transition-all duration-200 ease-in-out font-label-md text-label-md bg-primary/10" href="#">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+                    System Flow
+                </a>
+</li>
+</ul>
+<div class="px-sm mt-auto">
+<ul class="flex flex-col gap-sm">
+<li>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant dark:text-surface-variant hover:bg-surface-variant dark:hover:bg-on-surface-variant/10 transition-all duration-200 ease-in-out font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+                        Documentation
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant dark:text-surface-variant hover:bg-surface-variant dark:hover:bg-on-surface-variant/10 transition-all duration-200 ease-in-out font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+                        Help
+                    </a>
+</li>
+</ul>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 flex flex-col md:ml-64 w-full">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-inverse-surface border-b border-outline-variant dark:border-outline flex justify-between items-center h-16 px-gutter w-full docked full-width top-0 z-10 hidden md:flex">
+<div class="font-headline-md text-headline-md font-bold text-primary dark:text-inverse-primary">
+                Decision Engine
+            </div>
+<div class="flex items-center gap-md">
+<button aria-label="notifications" class="p-2 rounded-full text-on-surface-variant dark:text-surface-variant hover:bg-surface-variant dark:hover:bg-on-surface-variant/10 transition-colors duration-200">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button aria-label="settings" class="p-2 rounded-full text-on-surface-variant dark:text-surface-variant hover:bg-surface-variant dark:hover:bg-on-surface-variant/10 transition-colors duration-200">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-primary/20 overflow-hidden ml-2 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-xl" data-icon="person">person</span>
+</div>
+</div>
+</header>
+<!-- Page Content -->
+<main class="flex-1 p-md md:p-lg lg:p-xl overflow-y-auto">
+<div class="max-w-[container-max] mx-auto">
+<div class="mb-lg">
+<h2 class="font-headline-lg text-headline-lg text-on-surface">System Architecture Flow</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-sm">A visual guide to the decision-making process within the warehouse engine, illustrating the path from data ingestion to actionable robot commands.</p>
+</div>
+<!-- Flow Diagram Container -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.1)] p-lg overflow-x-auto">
+<div class="flex flex-col lg:flex-row items-center justify-between min-w-[800px] py-xl gap-lg">
+<!-- Step 1: Robot Data -->
+<div class="flex flex-col items-center w-48 relative group">
+<div class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center border border-primary/20 mb-md z-10 transition-transform group-hover:scale-110">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="sensors">sensors</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-center mb-xs">Robot Data</h3>
+<p class="font-body-sm text-body-sm text-center text-on-surface-variant">Telemetry, location, and load status are ingested continuously.</p>
+</div>
+<!-- Arrow -->
+<div class="hidden lg:flex items-center text-outline-variant -mx-xl z-0">
+<div class="w-16 border-t-2 border-dashed border-outline-variant"></div>
+<span class="material-symbols-outlined text-outline-variant" data-icon="arrow_forward_ios">arrow_forward_ios</span>
+</div>
+<div class="lg:hidden flex items-center text-outline-variant py-sm">
+<span class="material-symbols-outlined text-outline-variant" data-icon="keyboard_arrow_down">keyboard_arrow_down</span>
+</div>
+<!-- Step 2: Rule Engine -->
+<div class="flex flex-col items-center w-48 relative group">
+<div class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center border border-primary/20 mb-md z-10 transition-transform group-hover:scale-110">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="gavel">gavel</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-center mb-xs">Rule Engine</h3>
+<p class="font-body-sm text-body-sm text-center text-on-surface-variant">Data is fed into the central evaluation engine.</p>
+</div>
+<!-- Arrow -->
+<div class="hidden lg:flex items-center text-outline-variant -mx-xl z-0">
+<div class="w-16 border-t-2 border-dashed border-outline-variant"></div>
+<span class="material-symbols-outlined text-outline-variant" data-icon="arrow_forward_ios">arrow_forward_ios</span>
+</div>
+<div class="lg:hidden flex items-center text-outline-variant py-sm">
+<span class="material-symbols-outlined text-outline-variant" data-icon="keyboard_arrow_down">keyboard_arrow_down</span>
+</div>
+<!-- Step 3: Interpreter Pattern -->
+<div class="flex flex-col items-center w-48 relative group">
+<div class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center border border-primary/20 mb-md z-10 transition-transform group-hover:scale-110">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="translate">translate</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-center mb-xs">Interpreter Pattern</h3>
+<p class="font-body-sm text-body-sm text-center text-on-surface-variant">Parses complex logical conditions defined by administrators.</p>
+</div>
+</div>
+<div class="flex flex-col lg:flex-row items-center justify-center min-w-[800px] mt-lg lg:mt-xl mb-xl">
+<div class="hidden lg:flex items-center text-outline-variant h-16 w-full max-w-[2px] bg-outline-variant relative">
+<div class="absolute bottom-0 left-1/2 -translate-x-1/2 -mb-2">
+<span class="material-symbols-outlined text-outline-variant transform rotate-90" data-icon="arrow_forward_ios">arrow_forward_ios</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col lg:flex-row items-center justify-between min-w-[800px] py-xl gap-lg">
+<!-- Step 4: Rule Match -->
+<div class="flex flex-col items-center w-48 relative group">
+<div class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center border border-primary/20 mb-md z-10 transition-transform group-hover:scale-110">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="fact_check">fact_check</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-center mb-xs">Rule Match</h3>
+<p class="font-body-sm text-body-sm text-center text-on-surface-variant">Conditions are met, triggering a specific operational logic.</p>
+</div>
+<!-- Arrow -->
+<div class="hidden lg:flex items-center text-outline-variant -mx-xl z-0">
+<div class="w-16 border-t-2 border-dashed border-outline-variant"></div>
+<span class="material-symbols-outlined text-outline-variant" data-icon="arrow_forward_ios">arrow_forward_ios</span>
+</div>
+<div class="lg:hidden flex items-center text-outline-variant py-sm">
+<span class="material-symbols-outlined text-outline-variant" data-icon="keyboard_arrow_down">keyboard_arrow_down</span>
+</div>
+<!-- Step 5: Strategy Pattern -->
+<div class="flex flex-col items-center w-48 relative group">
+<div class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center border border-primary/20 mb-md z-10 transition-transform group-hover:scale-110">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="alt_route">alt_route</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-center mb-xs">Strategy Pattern</h3>
+<p class="font-body-sm text-body-sm text-center text-on-surface-variant">Dynamically selects the optimal algorithm for the task.</p>
+</div>
+<!-- Arrow -->
+<div class="hidden lg:flex items-center text-outline-variant -mx-xl z-0">
+<div class="w-16 border-t-2 border-dashed border-outline-variant"></div>
+<span class="material-symbols-outlined text-outline-variant" data-icon="arrow_forward_ios">arrow_forward_ios</span>
+</div>
+<div class="lg:hidden flex items-center text-outline-variant py-sm">
+<span class="material-symbols-outlined text-outline-variant" data-icon="keyboard_arrow_down">keyboard_arrow_down</span>
+</div>
+<!-- Step 6: Robot Action -->
+<div class="flex flex-col items-center w-48 relative group">
+<div class="w-16 h-16 rounded-full bg-primary flex items-center justify-center shadow-md mb-md z-10 transition-transform group-hover:scale-110">
+<span class="material-symbols-outlined text-on-primary text-3xl" data-icon="smart_toy">smart_toy</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-center mb-xs font-bold text-primary">Robot Action</h3>
+<p class="font-body-sm text-body-sm text-center text-on-surface-variant">Final command is dispatched to the warehouse robot.</p>
+</div>
+</div>
+</div>
+<!-- Explanation Panel -->
+<div class="mt-xl grid grid-cols-1 md:grid-cols-2 gap-lg">
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-[0_1px_3px_rgba(0,0,0,0.1)]">
+<h4 class="font-headline-sm text-headline-sm mb-md flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary" data-icon="info">info</span>
+                            Pattern Usage
+                        </h4>
+<ul class="space-y-md">
+<li class="flex items-start gap-sm">
+<span class="material-symbols-outlined text-secondary mt-1" data-icon="check_circle">check_circle</span>
+<div>
+<strong class="font-label-md text-label-md text-on-surface">Interpreter Pattern:</strong>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Used to evaluate boolean logic strings (e.g., "battery &lt; 20% AND load &gt; 50kg"). It turns administrative rules into executable code trees.</p>
+</div>
+</li>
+<li class="flex items-start gap-sm">
+<span class="material-symbols-outlined text-secondary mt-1" data-icon="check_circle">check_circle</span>
+<div>
+<strong class="font-label-md text-label-md text-on-surface">Strategy Pattern:</strong>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Allows the engine to swap out pathfinding or task-allocation algorithms at runtime without modifying the core robot logic classes.</p>
+</div>
+</li>
+</ul>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-[0_1px_3px_rgba(0,0,0,0.1)]">
+<h4 class="font-headline-sm text-headline-sm mb-md flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary" data-icon="code">code</span>
+                            Implementation Context
+                        </h4>
+<p class="font-body-md text-body-md text-on-surface-variant mb-md">This flow ensures high cohesion and loose coupling. Rules can be updated independently of the robots, and routing strategies can be swapped based on warehouse traffic.</p>
+<div class="bg-surface rounded-lg p-sm border border-outline-variant font-code text-code text-on-surface overflow-x-auto">
+<code>
+<span class="text-secondary">// Example Logic</span><br/>
+if (interpreter.evaluate(rule, robotData)) {<br/>
+  Strategy s = strategyFactory.get(rule.type);<br/>
+  s.execute(robot);<br/>
+}
+                            </code>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Manager Rule / Policy Assignment</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script th:src="@{/js/app-settings.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div class="app-layout">
+    <aside th:replace="~{fragments/sidebar :: sidebar('manager-policy-assignment')}"></aside>
+
+    <div class="workspace">
+        <header class="top-bar">
+            <div class="fw-bold text-primary">Manager Workflow</div>
+            <div th:replace="~{fragments/topbar-controls :: topbarControls}"></div>
+        </header>
+
+        <main class="page-canvas">
+            <section class="d-flex flex-column flex-xl-row justify-content-between gap-3 mb-4">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="status-badge status-default">Manager</span>
+                        <span class="status-badge status-moving">Zone-based policies</span>
+                    </div>
+                    <h1 class="h2 fw-bold mb-1">Manager Rule / Policy Assignment</h1>
+                    <p class="text-secondary mb-0">Assign existing active Admin-created rules as operational policies for warehouse zones.</p>
+                </div>
+                <div class="d-flex align-items-start">
+                    <a class="btn btn-outline-primary d-flex align-items-center gap-2" th:href="@{/rules}">
+                        <span class="material-symbols-outlined">rule</span>
+                        View Admin Rules
+                    </a>
+                </div>
+            </section>
+
+            <section class="logic-box mb-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="material-symbols-outlined text-primary fs-5">assignment</span>
+                    <div class="fw-semibold">Workflow position</div>
+                </div>
+                <p class="text-secondary mb-0">Admin creates rules. Manager assigns active policies to Zone A, Zone B, and Zone C for daily mission processing.</p>
+            </section>
+
+            <div class="alert alert-success" th:if="${successMessage != null}" th:text="${successMessage}">Zone policy assignment saved.</div>
+            <div class="alert alert-danger" th:if="${errorMessage != null}" th:text="${errorMessage}">Assignment error.</div>
+
+            <section class="row g-4 mb-4">
+                <div class="col-12 col-lg-4" th:each="zoneEntry : ${zoneCargoMappings}"
+                     th:with="assignment=${assignmentsByZone[zoneEntry.key]}, assignedRule=${assignedRulesByZone[zoneEntry.key]}">
+                    <div class="stitch-card h-100">
+                        <div class="card-title-row justify-content-between">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="material-symbols-outlined">warehouse</span>
+                                <h2 class="h5 fw-semibold mb-0" th:text="${zoneEntry.key}">Zone A</h2>
+                            </div>
+                            <span class="status-badge status-default" th:text="${zoneEntry.value}">Small Cargo</span>
+                        </div>
+
+                        <div class="p-4">
+                            <div class="metric-list mb-3">
+                                <div class="metric-list-row">
+                                    <span class="metric-label">Cargo Type</span>
+                                    <span class="fw-semibold" th:text="${zoneEntry.value}">Small Cargo</span>
+                                </div>
+                                <div class="metric-list-row">
+                                    <span class="metric-label">Current Policy</span>
+                                    <span class="fw-semibold text-end" th:if="${assignedRule != null}" th:text="${assignedRule.ruleName}">Low Battery Rule</span>
+                                    <span class="text-secondary" th:if="${assignedRule == null}">Not assigned</span>
+                                </div>
+                                <div class="metric-list-row" th:if="${assignedRule != null}">
+                                    <span class="metric-label">Strategy</span>
+                                    <span class="strategy-chip" th:text="${assignedRule.strategyName}">ChargingStrategy</span>
+                                </div>
+                            </div>
+
+                            <form th:action="@{/manager/policy-assignment}" method="post">
+                                <input type="hidden" name="zone" th:value="${zoneEntry.key}">
+                                <input type="hidden" name="cargoType" th:value="${zoneEntry.value}">
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold" th:for="|rule-${#strings.replace(zoneEntry.key, ' ', '-')}|">Assign active rule</label>
+                                    <select class="form-select" name="ruleId" th:id="|rule-${#strings.replace(zoneEntry.key, ' ', '-')}|"
+                                            th:disabled="${#lists.isEmpty(activeRules)}" required>
+                                        <option value="">Select an active rule...</option>
+                                        <option th:each="rule : ${activeRules}"
+                                                th:value="${rule.id}"
+                                                th:selected="${assignment != null and assignment.ruleId == rule.id}"
+                                                th:text="|${rule.ruleName} -> ${rule.strategyName}|">Low Battery Rule -> ChargingStrategy</option>
+                                    </select>
+                                    <div class="form-text">Only active Admin-created rules are available for assignment.</div>
+                                </div>
+
+                                <button class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2"
+                                        type="submit"
+                                        th:disabled="${#lists.isEmpty(activeRules)}">
+                                    <span class="material-symbols-outlined">save</span>
+                                    Save Zone Policy
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="row g-4">
+                <div class="col-12 col-xl-7">
+                    <div class="stitch-card h-100">
+                        <div class="card-title-row justify-content-between">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="material-symbols-outlined">rule</span>
+                                <h2 class="h5 fw-semibold mb-0">Active Admin Rules Available as Policies</h2>
+                            </div>
+                            <span class="text-secondary small" th:text="|${#lists.size(activeRules)} Active Rules|">0 Active Rules</span>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0">
+                                <thead>
+                                <tr>
+                                    <th>Priority</th>
+                                    <th>Rule Name</th>
+                                    <th>Condition</th>
+                                    <th>Strategy</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="rule : ${activeRules}">
+                                    <td><span class="status-badge status-default" th:text="${rule.priority}">1</span></td>
+                                    <td>
+                                        <div class="fw-semibold" th:text="${rule.ruleName}">Low Battery Rule</div>
+                                    </td>
+                                    <td><span class="code-text" th:text="${rule.conditionExpression}">battery &lt; 20</span></td>
+                                    <td><span class="strategy-chip" th:text="${rule.strategyName}">ChargingStrategy</span></td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(activeRules)}">
+                                    <td colspan="4">
+                                        <div class="empty-state">No active rules are available. Enable at least one rule in Admin Rule Management before assigning zone policies.</div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-xl-5">
+                    <div class="stitch-card h-100">
+                        <div class="card-title-row">
+                            <span class="material-symbols-outlined">account_tree</span>
+                            <h2 class="h5 fw-semibold mb-0">Policy Flow</h2>
+                        </div>
+                        <div class="p-4">
+                            <div class="flow-steps pickup-flow-steps mb-4">
+                                <div class="flow-step">
+                                    <span class="flow-step-icon"><span class="material-symbols-outlined">rule</span></span>
+                                    <span class="fw-semibold">Admin Rules</span>
+                                    <small class="text-secondary">Existing active rules</small>
+                                </div>
+                                <div class="flow-step">
+                                    <span class="flow-step-icon"><span class="material-symbols-outlined">assignment</span></span>
+                                    <span class="fw-semibold">Manager Policy</span>
+                                    <small class="text-secondary">Current page</small>
+                                </div>
+                                <div class="flow-step">
+                                    <span class="flow-step-icon"><span class="material-symbols-outlined">fact_check</span></span>
+                                    <span class="fw-semibold">Mission Processing</span>
+                                    <small class="text-secondary">Uses assigned policy</small>
+                                </div>
+                            </div>
+
+                            <div class="syntax-helper">
+                                <div class="fw-semibold mb-2">Supported zone assignments</div>
+                                <div class="d-flex flex-column gap-1 small">
+                                    <div th:each="entry : ${zoneCargoMappings}">
+                                        <span class="code-text" th:text="|${entry.key} -> ${entry.value}|">Zone A -> Small Cargo</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-secondary mt-3 mb-0">Zone policies are database-backed assignments; rule evaluation and strategy classes stay unchanged.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+<script th:src="@{/js/app-notifications.js}" defer></script>
+</body>
+</html>

@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Warehouse Decision Engine Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-primary-container": "#fefcff",
+                        "inverse-surface": "#27313f",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-high": "#dee9fc",
+                        "primary-container": "#2170e4",
+                        "on-secondary-fixed-variant": "#444749",
+                        "on-error-container": "#93000a",
+                        "on-error": "#ffffff",
+                        "secondary-fixed": "#e1e2e4",
+                        "on-secondary-fixed": "#191c1e",
+                        "secondary": "#5c5f60",
+                        "primary-fixed": "#d8e2ff",
+                        "surface": "#f8f9ff",
+                        "surface-container": "#e6eeff",
+                        "inverse-primary": "#adc6ff",
+                        "on-primary-fixed-variant": "#004395",
+                        "background": "#f8f9ff",
+                        "tertiary-fixed-dim": "#ffb786",
+                        "outline": "#727785",
+                        "outline-variant": "#c2c6d6",
+                        "surface-variant": "#d9e3f6",
+                        "on-secondary-container": "#606365",
+                        "on-primary": "#ffffff",
+                        "secondary-container": "#dee0e2",
+                        "on-surface-variant": "#424754",
+                        "tertiary-container": "#b75b00",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed": "#311400",
+                        "surface-tint": "#005ac2",
+                        "primary": "#0058be",
+                        "surface-bright": "#f8f9ff",
+                        "tertiary": "#924700",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed": "#ffdcc6",
+                        "on-tertiary-container": "#fffbff",
+                        "on-secondary": "#ffffff",
+                        "surface-dim": "#d0dbed",
+                        "primary-fixed-dim": "#adc6ff",
+                        "on-primary-fixed": "#001a42",
+                        "on-tertiary-fixed-variant": "#723600",
+                        "secondary-fixed-dim": "#c5c6c8",
+                        "error": "#ba1a1a",
+                        "on-background": "#121c2a",
+                        "on-surface": "#121c2a",
+                        "surface-container-highest": "#d9e3f6",
+                        "surface-container-low": "#eff4ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "container-max": "1200px",
+                        "base": "4px",
+                        "sm": "8px",
+                        "md": "16px",
+                        "gutter": "24px",
+                        "lg": "24px",
+                        "xl": "40px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "code": ["monospace"],
+                        "headline-sm": ["Inter"],
+                        "label-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "code": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex">
+<!-- SideNavBar -->
+<nav class="fixed left-0 top-0 h-full w-64 border-r border-outline-variant bg-surface-container-low flex flex-col py-lg z-20 hidden md:flex">
+<div class="px-gutter mb-xl flex items-center gap-md">
+<span class="material-symbols-outlined text-primary text-[32px]" style="font-variation-settings: 'FILL' 1;">widgets</span>
+<div>
+<h1 class="font-headline-sm text-headline-sm font-semibold text-on-surface">Warehouse Engine</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Decision Control System</p>
+</div>
+</div>
+<div class="flex-1 px-sm space-y-sm">
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-primary font-bold border-r-4 border-primary bg-surface-variant" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-variant transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">rule</span>
+<span class="font-label-md text-label-md">Rule Management</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-variant transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">precision_manufacturing</span>
+<span class="font-label-md text-label-md">Robot Management</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-variant transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">play_circle</span>
+<span class="font-label-md text-label-md">Execution Simulator</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-variant transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-label-md text-label-md">System Flow</span>
+</a>
+</div>
+<div class="px-sm mt-auto space-y-sm border-t border-outline-variant pt-md">
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-variant transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="font-label-md text-label-md">Documentation</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-variant transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="font-label-md text-label-md">Help</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 flex flex-col md:ml-64 w-full">
+<!-- TopAppBar -->
+<header class="bg-surface docked full-width top-0 border-b border-outline-variant flex justify-between items-center h-16 px-gutter w-full z-10 sticky top-0">
+<div class="flex items-center md:hidden">
+<span class="material-symbols-outlined text-primary text-[28px]" style="font-variation-settings: 'FILL' 1;">widgets</span>
+<span class="ml-sm font-headline-md text-headline-md font-bold text-primary">Decision Engine</span>
+</div>
+<div class="hidden md:block">
+<h2 class="font-headline-md text-headline-md font-semibold text-on-surface">Engine Overview</h2>
+</div>
+<div class="flex items-center gap-md">
+<button class="p-sm text-on-surface-variant hover:bg-surface-variant rounded-full transition-colors duration-200">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-sm text-on-surface-variant hover:bg-surface-variant rounded-full transition-colors duration-200">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-label-md ml-sm border border-outline-variant">
+                    JD
+                </div>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="flex-1 p-md md:p-lg overflow-y-auto w-full max-w-container-max mx-auto">
+<!-- KPI Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-lg mb-lg">
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-md shadow-[0px_1px_3px_rgba(0,0,0,0.1)] flex items-center gap-md">
+<div class="w-12 h-12 rounded-full bg-primary-container/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">precision_manufacturing</span>
+</div>
+<div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Active Robots</p>
+<p class="font-headline-lg text-headline-lg text-on-surface">24<span class="font-body-sm text-body-sm text-on-surface-variant ml-xs">/ 30</span></p>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-md shadow-[0px_1px_3px_rgba(0,0,0,0.1)] flex items-center gap-md">
+<div class="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+</div>
+<div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Total Orders</p>
+<p class="font-headline-lg text-headline-lg text-on-surface">1,492</p>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-md shadow-[0px_1px_3px_rgba(0,0,0,0.1)] flex items-center gap-md">
+<div class="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">rule</span>
+</div>
+<div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Active Rules</p>
+<p class="font-headline-lg text-headline-lg text-on-surface">86</p>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-md shadow-[0px_1px_3px_rgba(0,0,0,0.1)] flex items-center gap-md">
+<div class="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">strategy</span>
+</div>
+<div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Optimization Strats</p>
+<p class="font-headline-lg text-headline-lg text-on-surface">3</p>
+</div>
+</div>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-lg">
+<!-- Robot Status List -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg shadow-[0px_1px_3px_rgba(0,0,0,0.1)] flex flex-col col-span-1">
+<div class="p-md border-b border-outline-variant flex justify-between items-center">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Robot Status</h3>
+<button class="text-primary hover:text-primary-container font-label-md text-label-md">View All</button>
+</div>
+<div class="p-md flex-1 overflow-y-auto space-y-sm">
+<div class="flex items-center justify-between p-sm border border-outline-variant rounded bg-surface">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary">robot_2</span>
+<span class="font-label-md text-label-md text-on-surface">Robot A01</span>
+</div>
+<span class="px-sm py-xs rounded text-xs font-semibold bg-surface-container-high text-primary border border-outline-variant">Moving</span>
+</div>
+<div class="flex items-center justify-between p-sm border border-outline-variant rounded bg-surface">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-outline">robot_2</span>
+<span class="font-label-md text-label-md text-on-surface">Robot A02</span>
+</div>
+<span class="px-sm py-xs rounded text-xs font-semibold bg-surface-variant text-on-surface-variant border border-outline-variant">Charging</span>
+</div>
+<div class="flex items-center justify-between p-sm border border-outline-variant rounded bg-surface">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary">robot_2</span>
+<span class="font-label-md text-label-md text-on-surface">Robot B14</span>
+</div>
+<span class="px-sm py-xs rounded text-xs font-semibold bg-surface-container-high text-primary border border-outline-variant">Picking</span>
+</div>
+<div class="flex items-center justify-between p-sm border border-outline-variant rounded bg-surface">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-error">warning</span>
+<span class="font-label-md text-label-md text-on-surface">Robot C07</span>
+</div>
+<span class="px-sm py-xs rounded text-xs font-semibold bg-error-container text-on-error-container border border-error">Error</span>
+</div>
+<div class="flex items-center justify-between p-sm border border-outline-variant rounded bg-surface">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary">robot_2</span>
+<span class="font-label-md text-label-md text-on-surface">Robot D22</span>
+</div>
+<span class="px-sm py-xs rounded text-xs font-semibold bg-surface-container-high text-primary border border-outline-variant">Moving</span>
+</div>
+</div>
+</div>
+<!-- Recent Rule Executions Table -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg shadow-[0px_1px_3px_rgba(0,0,0,0.1)] flex flex-col col-span-1 lg:col-span-2">
+<div class="p-md border-b border-outline-variant flex justify-between items-center">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Recent Rule Executions</h3>
+<div class="flex gap-sm">
+<button class="p-xs text-on-surface-variant hover:bg-surface-variant rounded border border-outline-variant">
+<span class="material-symbols-outlined text-sm">filter_list</span>
+</button>
+</div>
+</div>
+<div class="p-0 overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low border-b border-outline-variant font-label-md text-label-md text-on-surface-variant">
+<th class="p-sm md:p-md font-medium">Timestamp</th>
+<th class="p-sm md:p-md font-medium">Rule Name</th>
+<th class="p-sm md:p-md font-medium">Trigger Entity</th>
+<th class="p-sm md:p-md font-medium">Action Taken</th>
+<th class="p-sm md:p-md font-medium text-right">Status</th>
+</tr>
+</thead>
+<tbody class="font-body-sm text-body-sm text-on-surface">
+<tr class="border-b border-outline-variant hover:bg-surface-variant/50 transition-colors">
+<td class="p-sm md:p-md text-on-surface-variant">10:42:05 AM</td>
+<td class="p-sm md:p-md font-medium">Route Optimization Alpha</td>
+<td class="p-sm md:p-md">Robot A01</td>
+<td class="p-sm md:p-md">Rerouted via Aisle 4</td>
+<td class="p-sm md:p-md text-right">
+<span class="inline-flex items-center gap-xs text-primary bg-surface-container-high px-sm py-xs rounded text-xs border border-outline-variant">
+<span class="material-symbols-outlined text-[16px]">check_circle</span> Success
+                                        </span>
+</td>
+</tr>
+<tr class="border-b border-outline-variant hover:bg-surface-variant/50 transition-colors">
+<td class="p-sm md:p-md text-on-surface-variant">10:41:12 AM</td>
+<td class="p-sm md:p-md font-medium">Low Battery Return</td>
+<td class="p-sm md:p-md">Robot A02</td>
+<td class="p-sm md:p-md">Assigned Station 2</td>
+<td class="p-sm md:p-md text-right">
+<span class="inline-flex items-center gap-xs text-primary bg-surface-container-high px-sm py-xs rounded text-xs border border-outline-variant">
+<span class="material-symbols-outlined text-[16px]">check_circle</span> Success
+                                        </span>
+</td>
+</tr>
+<tr class="border-b border-outline-variant hover:bg-surface-variant/50 transition-colors">
+<td class="p-sm md:p-md text-on-surface-variant">10:38:55 AM</td>
+<td class="p-sm md:p-md font-medium">Collision Avoidance</td>
+<td class="p-sm md:p-md">Robot C07</td>
+<td class="p-sm md:p-md">Emergency Stop</td>
+<td class="p-sm md:p-md text-right">
+<span class="inline-flex items-center gap-xs text-error bg-error-container px-sm py-xs rounded text-xs border border-error">
+<span class="material-symbols-outlined text-[16px]">warning</span> Alert
+                                        </span>
+</td>
+</tr>
+<tr class="hover:bg-surface-variant/50 transition-colors">
+<td class="p-sm md:p-md text-on-surface-variant">10:35:20 AM</td>
+<td class="p-sm md:p-md font-medium">Order Allocation</td>
+<td class="p-sm md:p-md">System</td>
+<td class="p-sm md:p-md">Dispatched 5 Robots</td>
+<td class="p-sm md:p-md text-right">
+<span class="inline-flex items-center gap-xs text-primary bg-surface-container-high px-sm py-xs rounded text-xs border border-outline-variant">
+<span class="material-symbols-outlined text-[16px]">check_circle</span> Success
+                                        </span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Warehouse Activity Panel -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg shadow-[0px_1px_3px_rgba(0,0,0,0.1)] flex flex-col col-span-1 lg:col-span-3">
+<div class="p-md border-b border-outline-variant flex justify-between items-center">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Engine Processing Phase</h3>
+</div>
+<div class="p-lg flex flex-col gap-lg">
+<div class="flex items-center gap-md">
+<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined text-[18px]">done</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between mb-xs">
+<span class="font-label-md text-label-md text-on-surface">Data Ingestion</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Complete</span>
+</div>
+<div class="w-full bg-surface-variant h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-full"></div>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<div class="w-8 h-8 rounded-full border-2 border-primary text-primary flex items-center justify-center bg-surface-container-lowest">
+<span class="material-symbols-outlined text-[18px] animate-spin">sync</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between mb-xs">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Rule Evaluation Engine</span>
+<span class="font-body-sm text-body-sm text-primary">Processing...</span>
+</div>
+<div class="w-full bg-surface-variant h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[65%]"></div>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<div class="w-8 h-8 rounded-full border-2 border-outline-variant text-outline-variant flex items-center justify-center bg-surface-container-lowest">
+<span class="font-label-md">3</span>
+</div>
+<div class="flex-1 opacity-50">
+<div class="flex justify-between mb-xs">
+<span class="font-label-md text-label-md text-on-surface">Action Dispatch</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Pending</span>
+</div>
+<div class="w-full bg-surface-variant h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-0"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

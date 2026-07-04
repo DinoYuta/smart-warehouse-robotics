@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<aside class="side-nav" th:fragment="sidebar(activePage)">
+    <div class="brand-block">
+        <span class="material-symbols-outlined brand-icon">widgets</span>
+        <div>
+            <div class="brand-title">Warehouse Engine</div>
+            <div class="brand-subtitle">Decision Control System</div>
+        </div>
+    </div>
+
+    <nav class="nav-group" aria-label="Role-based navigation">
+        <section class="nav-section" aria-label="Admin navigation" th:if="${isAdmin}">
+            <div class="nav-section-title" data-i18n="admin">Admin</div>
+            <a class="nav-item" th:classappend="${activePage == 'dashboard'} ? ' active' : ''" th:href="@{/dashboard}">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span class="nav-item-label" data-i18n="dashboard">Dashboard</span>
+            </a>
+            <a class="nav-item" th:classappend="${activePage == 'rules'} ? ' active' : ''" th:href="@{/rules}">
+                <span class="material-symbols-outlined">rule</span>
+                <span class="nav-item-label" data-i18n="ruleManagement">Rule Management</span>
+            </a>
+            <a class="nav-item" th:classappend="${activePage == 'robots'} ? ' active' : ''" th:href="@{/robots}">
+                <span class="material-symbols-outlined">precision_manufacturing</span>
+                <span class="nav-item-label" data-i18n="robotManagement">Robot Management</span>
+            </a>
+            <a class="nav-item" th:classappend="${activePage == 'simulation'} ? ' active' : ''" th:href="@{/simulation}">
+                <span class="material-symbols-outlined">play_circle</span>
+                <span class="nav-item-label" data-i18n="simulation">Simulation</span>
+            </a>
+            <a class="nav-item" th:classappend="${activePage == 'system-flow'} ? ' active' : ''" th:href="@{/system-flow}">
+                <span class="material-symbols-outlined">account_tree</span>
+                <span class="nav-item-label" data-i18n="systemFlow">System Flow</span>
+            </a>
+            <a class="nav-item" th:classappend="${activePage == 'admin-users'} ? ' active' : ''" th:href="@{/admin/users}">
+                <span class="material-symbols-outlined">manage_accounts</span>
+                <span class="nav-item-label" data-i18n="userManagement">User Management</span>
+            </a>
+        </section>
+
+        <section class="nav-section" aria-label="Manager navigation" th:if="${isManage}">
+            <div class="nav-section-title" data-i18n="manager">Manager</div>
+            <a class="nav-item" th:classappend="${activePage == 'manager-robot-tasks'} ? ' active' : ''" th:href="@{/manager/robot-tasks}">
+                <span class="material-symbols-outlined">warehouse</span>
+                <span class="nav-item-label" data-i18n="robotTaskBoard">Robot Task Board</span>
+            </a>
+            <a class="nav-item" th:classappend="${activePage == 'manager-policy-assignment'} ? ' active' : ''" th:href="@{/manager/policy-assignment}">
+                <span class="material-symbols-outlined">assignment</span>
+                <span class="nav-item-label" data-i18n="policyAssignment">Rule / Policy Assignment</span>
+            </a>
+            <a class="nav-item" th:classappend="${activePage == 'manager-customer-pickup-codes'} ? ' active' : ''" th:href="@{/manager/customer-pickup-codes}">
+                <span class="material-symbols-outlined">mark_email_read</span>
+                <span class="nav-item-label" data-i18n="customerPickupCodes">Customer Pickup Codes</span>
+            </a>
+        </section>
+
+        <section class="nav-section" aria-label="Staff navigation" th:if="${isStaff}">
+            <div class="nav-section-title" data-i18n="staff">Staff</div>
+            <a class="nav-item" th:classappend="${activePage == 'staff-pickup-request'} ? ' active' : ''" th:href="@{/staff/pickup-request}">
+                <span class="material-symbols-outlined">add_task</span>
+                <span class="nav-item-label" data-i18n="pickupRequest">Create Pickup Request</span>
+            </a>
+            <a class="nav-item" th:classappend="${activePage == 'staff-missions'} ? ' active' : ''" th:href="@{/staff/missions}">
+                <span class="material-symbols-outlined">fact_check</span>
+                <span class="nav-item-label" data-i18n="myMissions">My Missions</span>
+            </a>
+            <a class="nav-item"
+               th:classappend="${activePage == 'staff-live-map'} ? ' active' : ''"
+               th:href="@{/staff/live-map}"
+               target="_blank"
+               rel="noopener noreferrer">
+                <span class="material-symbols-outlined">map</span>
+                <span class="nav-item-label" data-i18n="liveWarehouseMap">Live Warehouse Map</span>
+            </a>
+        </section>
+
+    </nav>
+</aside>
+</body>
+</html>

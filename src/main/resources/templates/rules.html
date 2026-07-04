@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Rule Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script th:src="@{/js/app-settings.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div class="app-layout">
+    <aside th:replace="~{fragments/sidebar :: sidebar('rules')}"></aside>
+
+    <div class="workspace">
+        <header class="top-bar">
+            <div class="fw-bold text-primary">Decision Engine</div>
+            <div th:replace="~{fragments/topbar-controls :: topbarControls}"></div>
+        </header>
+
+        <main class="page-canvas">
+            <section class="mb-4">
+                <h1 class="h2 fw-bold mb-1">Rule Management</h1>
+                <p class="text-secondary mb-0">Create and maintain rules that connect warehouse conditions to robot strategies.</p>
+            </section>
+
+            <div class="alert alert-success" th:if="${successMessage != null}" th:text="${successMessage}">Rule saved.</div>
+            <div class="alert alert-danger" th:if="${errorMessage != null}" th:text="${errorMessage}">Rule error.</div>
+
+            <section class="row g-4">
+                <div class="col-12 col-lg-5">
+                    <div class="stitch-card">
+                        <div class="card-title-row">
+                            <span class="material-symbols-outlined">add_circle</span>
+                            <h2 class="h5 fw-semibold mb-0" th:text="${editMode ? 'Edit Rule' : 'Define New Rule'}">Define New Rule</h2>
+                        </div>
+
+                        <form class="p-4" th:action="@{/rules}" th:object="${ruleForm}" method="post">
+                            <input type="hidden" th:field="*{id}">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold" for="ruleName">Rule Name</label>
+                                <input class="form-control" id="ruleName" type="text" th:field="*{ruleName}" placeholder="Critical Battery With Obstacle" required>
+                            </div>
+
+                            <div class="logic-box mb-3">
+                                <div class="d-flex align-items-center gap-2 text-secondary mb-3">
+                                    <span class="material-symbols-outlined fs-6">psychology</span>
+                                    <span class="fw-semibold small text-uppercase">The Logic</span>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label code-text text-primary fw-bold" for="conditionExpression">IF</label>
+                                    <input class="form-control code-text" id="conditionExpression" type="text" th:field="*{conditionExpression}" placeholder="priority == 1 OR distance &gt; 15" required>
+                                </div>
+                                <details class="technical-details mb-3">
+                                    <summary>Supported syntax</summary>
+                                    <div class="d-flex flex-wrap gap-2 mb-2">
+                                        <span class="strategy-chip code-text">battery</span>
+                                        <span class="strategy-chip code-text">obstacleDetected</span>
+                                        <span class="strategy-chip code-text">robotLoad</span>
+                                        <span class="strategy-chip code-text">distance</span>
+                                        <span class="strategy-chip code-text">priority</span>
+                                    </div>
+                                    <div class="small text-secondary">Operators: <span class="code-text">&lt; &gt; == &lt;= &gt;= AND OR</span></div>
+                                    <div class="small text-secondary mt-1">Example: <span class="code-text">battery &lt; 20 AND obstacleDetected == TRUE</span></div>
+                                    <div class="small text-secondary mt-1" data-i18n-text="robotLoad means estimated cargo load percentage. Small Cargo = 30%, Medium Cargo = 60%, Large Cargo = 90%.">robotLoad means estimated cargo load percentage. Small Cargo = 30%, Medium Cargo = 60%, Large Cargo = 90%.</div>
+                                </details>
+                                <div>
+                                    <label class="form-label code-text text-secondary fw-bold" for="strategyName">THEN</label>
+                                    <select class="form-select code-text" id="strategyName" th:field="*{strategyName}" required>
+                                        <option value="">Select Strategy...</option>
+                                        <option th:each="strategyName : ${strategyNames}" th:value="${strategyName}" th:text="${strategyName}">ChargingStrategy</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-4">
+                                <div class="col-6">
+                                    <label class="form-label fw-semibold" for="priority">Priority</label>
+                                    <input class="form-control" id="priority" type="number" min="1" th:field="*{priority}" required>
+                                </div>
+                                <div class="col-6 d-flex align-items-end">
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" id="activeStatus" type="checkbox" th:field="*{activeStatus}">
+                                        <label class="form-check-label fw-semibold" for="activeStatus">Active</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-primary flex-fill d-flex align-items-center justify-content-center gap-2" type="submit">
+                                    <span class="material-symbols-outlined fs-6">save</span>
+                                    Save Rule
+                                </button>
+                                <a class="btn btn-outline-secondary flex-fill" th:href="@{/rules}" th:if="${editMode}">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="col-12 col-lg-7">
+                    <div class="stitch-card h-100">
+                        <div class="card-title-row justify-content-between">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="material-symbols-outlined">list_alt</span>
+                            <h2 class="h5 fw-semibold mb-0">Rule List</h2>
+                            </div>
+                            <span class="text-secondary small" th:text="|${#lists.size(rules)} Rules Stored|">0 Rules Stored</span>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0">
+                                <thead>
+                                <tr>
+                                    <th>Priority</th>
+                                    <th>Rule</th>
+                                    <th>Condition</th>
+                                    <th>Strategy</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="rule : ${rules}">
+                                    <td><span class="status-badge status-default" th:text="${rule.priority}">1</span></td>
+                                    <td>
+                                        <div class="fw-semibold" th:text="${rule.ruleName}">Critical Battery</div>
+                                        <div class="code-text text-secondary" th:text="|ID ${rule.id}|">ID 1</div>
+                                    </td>
+                                    <td>
+                                        <span class="rule-condition-pill code-text" th:text="${rule.conditionExpression}">battery &lt; 20</span>
+                                    </td>
+                                    <td>
+                                        <span class="strategy-chip code-text" th:text="${rule.strategyName}">ChargingStrategy</span>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge" th:classappend="${rule.activeStatus} ? ' status-moving' : ' status-default'" th:text="${rule.activeStatus ? 'Active' : 'Disabled'}">Active</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <a class="action-button text-decoration-none" th:href="@{/rules/{id}/edit(id=${rule.id})}" title="Edit">
+                                            <span class="material-symbols-outlined fs-5">edit</span>
+                                        </a>
+                                        <form class="inline-action-form" th:action="@{/rules/{id}/toggle(id=${rule.id})}" method="post">
+                                            <button class="action-button" type="submit" title="Enable or disable">
+                                                <span class="material-symbols-outlined fs-5" th:text="${rule.activeStatus ? 'toggle_on' : 'toggle_off'}">toggle_on</span>
+                                            </button>
+                                        </form>
+                                        <form class="inline-action-form" th:action="@{/rules/{id}/delete(id=${rule.id})}" method="post">
+                                            <button class="action-button danger-action" type="submit" title="Delete">
+                                                <span class="material-symbols-outlined fs-5">delete</span>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(rules)}">
+                                    <td colspan="6"><div class="empty-state">No rules have been created yet. Use the form to add the first runtime rule.</div></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+<script th:src="@{/js/app-notifications.js}" defer></script>
+</body>
+</html>

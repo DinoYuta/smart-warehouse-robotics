@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Staff Missions</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script th:src="@{/js/app-settings.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div class="app-layout">
+    <aside th:replace="~{fragments/sidebar :: sidebar('staff-missions')}"></aside>
+
+    <div class="workspace">
+        <header class="top-bar">
+            <div class="fw-bold text-primary">Staff Workflow</div>
+            <div th:replace="~{fragments/topbar-controls :: topbarControls}"></div>
+        </header>
+
+        <main class="page-canvas">
+            <section class="d-flex flex-column flex-xl-row justify-content-between gap-3 mb-4">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="status-badge status-default" data-i18n="staff">Staff</span>
+                        <span class="status-badge status-moving" data-i18n="missionReview">Mission review</span>
+                    </div>
+                    <h1 class="h2 fw-bold mb-1" data-i18n="myMissions">My Missions</h1>
+                    <p class="text-secondary mb-0">Process pickup requests, start assigned work, and close missions after return.</p>
+                </div>
+                <div class="staff-page-actions d-flex flex-wrap align-items-start gap-2">
+                    <a class="btn btn-outline-primary d-flex align-items-center gap-2" th:href="@{/staff/live-map}">
+                        <span class="material-symbols-outlined">map</span>
+                        <span data-i18n="liveMap">Live Map</span>
+                    </a>
+                    <a class="btn btn-primary d-flex align-items-center gap-2" th:href="@{/staff/pickup-request}">
+                        <span class="material-symbols-outlined">add_task</span>
+                        <span data-i18n="newPickupRequest">New Pickup Request</span>
+                    </a>
+                </div>
+            </section>
+
+            <section class="summary-strip mb-4" aria-label="Mission lifecycle summary">
+                <span class="summary-strip-label" data-i18n="lifecycle">Lifecycle</span>
+                <span class="status-badge mission-status-pending" data-i18n-text="PENDING">PENDING</span>
+                <span class="material-symbols-outlined fs-6 text-secondary">arrow_forward</span>
+                <span class="status-badge mission-status-assigned" data-i18n-text="ASSIGNED">ASSIGNED</span>
+                <span class="material-symbols-outlined fs-6 text-secondary">arrow_forward</span>
+                <span class="status-badge mission-status-in-progress" data-i18n-text="IN_PROGRESS">IN_PROGRESS</span>
+                <span class="material-symbols-outlined fs-6 text-secondary">arrow_forward</span>
+                <span class="status-badge mission-status-waiting-confirmation" data-i18n-text="WAITING_CONFIRMATION">WAITING_CONFIRMATION</span>
+                <span class="material-symbols-outlined fs-6 text-secondary">arrow_forward</span>
+                <span class="status-badge mission-status-completed" data-i18n-text="COMPLETED">COMPLETED</span>
+                <span class="ms-auto text-secondary small">Use Details for rule trace and decision output.</span>
+            </section>
+
+            <div class="alert alert-success" role="alert" th:if="${successMessage != null}" th:text="${successMessage}">
+                Mission processed.
+            </div>
+            <div class="alert alert-danger" role="alert" th:if="${errorMessage != null}" th:text="${errorMessage}">
+                Mission could not be processed.
+            </div>
+            <div class="visually-hidden"
+                 th:if="${notificationMessage != null}"
+                 data-notification-event
+                 th:data-notification-key="${notificationKey}"
+                 th:data-notification-message="${notificationMessage}"
+                 th:data-notification-type="${notificationType != null ? notificationType : 'info'}"></div>
+            <div class="visually-hidden"
+                 th:if="${taskReassignedNotificationMessage != null}"
+                 data-notification-event
+                 th:data-notification-key="${taskReassignedNotificationKey}"
+                 th:data-notification-message="${taskReassignedNotificationMessage}"
+                 th:data-notification-type="${taskReassignedNotificationType != null ? taskReassignedNotificationType : 'warning'}"></div>
+            <div class="visually-hidden"
+                 th:if="${chargingStartedNotificationMessage != null}"
+                 data-notification-event
+                 th:data-notification-key="${chargingStartedNotificationKey}"
+                 th:data-notification-message="${chargingStartedNotificationMessage}"
+                 th:data-notification-type="${chargingStartedNotificationType != null ? chargingStartedNotificationType : 'info'}"></div>
+
+            <section class="row g-4 mb-4">
+                <div class="col-12 col-md-3">
+                    <div class="metric-card p-3 h-100">
+                        <div class="metric-label">Total Missions</div>
+                        <div class="metric-value" th:text="${missions != null ? #lists.size(missions) : 0}">0</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-3">
+                    <div class="metric-card p-3 h-100">
+                        <div class="metric-label">Active / Waiting</div>
+                        <div class="metric-value" th:text="${activeMissions != null ? #lists.size(activeMissions) : 0}">0</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-3">
+                    <div class="metric-card p-3 h-100">
+                        <div class="metric-label" data-i18n="completed">Completed</div>
+                        <div class="metric-value" th:text="${completedMissions != null ? #lists.size(completedMissions) : 0}">0</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-3">
+                    <div class="metric-card p-3 h-100">
+                        <div class="metric-label" data-i18n="cancelledStopped">Cancelled / Stopped</div>
+                        <div class="metric-value" th:text="${cancelledMissions != null ? #lists.size(cancelledMissions) : 0}">0</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="stitch-card mb-4">
+                <div class="card-title-row justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="material-symbols-outlined">fact_check</span>
+                        <h2 class="h5 fw-semibold mb-0" data-i18n="missionStatus">Mission Status</h2>
+                    </div>
+                    <form class="d-flex align-items-center gap-2" th:action="@{/staff/missions}" method="get">
+                        <label class="metric-label mb-0" for="mission-filter" data-i18n="group">Group</label>
+                        <select id="mission-filter"
+                                class="form-select form-select-sm"
+                                name="filter"
+                                onchange="this.form.submit()">
+                            <option value="active" th:selected="${selectedMissionFilter == 'active'}" data-i18n="activeWaiting">Active / Waiting</option>
+                            <option value="completed" th:selected="${selectedMissionFilter == 'completed'}" data-i18n="completed">Completed</option>
+                            <option value="cancelled" th:selected="${selectedMissionFilter == 'cancelled'}" data-i18n="cancelledStopped">Cancelled / Stopped</option>
+                            <option value="all" th:selected="${selectedMissionFilter == 'all'}" data-i18n="allMissions">All non-deleted missions</option>
+                        </select>
+                    </form>
+                </div>
+
+                <div class="p-4">
+                    <div class="empty-state" th:if="${missions == null or #lists.isEmpty(missions)}">
+                        No missions have been saved yet. Create a pickup request to add the first pending mission.
+                    </div>
+
+                    <div class="d-flex flex-column flex-md-row justify-content-between gap-2 mb-3"
+                         th:if="${missions != null and !#lists.isEmpty(missions)}">
+                        <div>
+                            <div class="metric-label">Selected group</div>
+                            <div class="fw-semibold" th:text="${visibleMissionGroupTitle}">Active / Waiting</div>
+                        </div>
+                        <span class="status-badge status-default"
+                              th:text="|${visibleMissions != null ? #lists.size(visibleMissions) : 0} mission(s), newest first|">0 mission(s), newest first</span>
+                    </div>
+
+                    <div class="empty-state" th:if="${missions != null and !#lists.isEmpty(missions) and (visibleMissions == null or #lists.isEmpty(visibleMissions))}">
+                        No missions are currently in this group.
+                    </div>
+
+                    <div class="mission-card-list" th:if="${visibleMissions != null and !#lists.isEmpty(visibleMissions)}">
+                        <article class="mission-card"
+                                 th:each="mission : ${visibleMissions}"
+                                 th:with="strategyLabel=${mission.selectedStrategyName == 'FastRouteStrategy' ? 'FastRouteStrategy' : (mission.selectedStrategyName == 'EnergySavingStrategy' ? 'EnergySavingStrategy' : (mission.selectedStrategyName == 'HeavyLoadStrategy' ? 'HeavyLoadStrategy' : (mission.selectedStrategyName == 'ObstacleAvoidanceStrategy' ? 'ObstacleAvoidanceStrategy' : (mission.selectedStrategyName == 'ChargingStrategy' ? 'ChargingStrategy' : (mission.selectedStrategyName == 'SafeRouteStrategy' ? 'SafeRouteStrategy' : mission.selectedStrategyName)))))},
+                                          completionReady=${completionReadyByMissionId[mission.id] == true},
+                                          completionWaiting=${completionWaitingByMissionId[mission.id] == true}">
+                            <div class="mission-card-top">
+                                <div class="min-w-0">
+                                    <div class="d-flex flex-wrap align-items-center gap-2">
+                                        <h3 class="h5 fw-bold mb-0" th:text="${mission.requestCode}">REQ-1001</h3>
+                                        <span class="status-badge"
+                                              th:classappend="${mission.statusBadgeClass}"
+                                              th:text="${mission.status}"
+                                              th:data-i18n-text="${mission.status}">PENDING</span>
+                                        <span class="status-badge"
+                                              th:classappend="${mission.priorityBadgeClass}"
+                                              th:text="${mission.priorityLabel}">1 = High</span>
+                                    </div>
+                                    <div class="small text-secondary mt-1">
+                                        <span th:text="${mission.customerName != null ? mission.customerName : 'Customer not provided'}">Customer A</span>
+                                        <span class="mx-1">/</span>
+                                        <span th:text="${mission.cargoType}" th:data-i18n-text="${mission.cargoType}">Small Cargo</span>
+                                        <span class="mx-1">/</span>
+                                        <span th:text="${mission.zone}" th:data-i18n-text="${mission.zone}">Zone A</span>
+                                        <span class="mx-1">/</span>
+                                        <span class="code-text" th:text="${mission.locationCode}">A1</span>
+                                    </div>
+                                </div>
+
+                                <div class="mission-actions">
+                                    <form th:if="${mission.isPendingMission()}"
+                                          th:action="@{/staff/missions/{id}/process(id=${mission.id})}"
+                                          method="post">
+                                        <button class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1"
+                                                type="submit"
+                                                title="Process Mission / Assign Robot"
+                                                aria-label="Process Mission / Assign Robot">
+                                            <span class="material-symbols-outlined fs-6">play_arrow</span>
+                                            <span data-i18n="process">Process</span>
+                                        </button>
+                                    </form>
+                                    <form th:if="${mission.isStartableMission()}"
+                                          th:action="@{/staff/missions/{id}/start-execution(id=${mission.id})}"
+                                          method="post">
+                                        <button class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1" type="submit">
+                                            <span class="material-symbols-outlined fs-6">play_circle</span>
+                                            <span data-i18n="startExecution">Start Execution</span>
+                                        </button>
+                                    </form>
+                                    <form th:if="${completionReady}"
+                                          th:action="@{/staff/missions/{id}/complete(id=${mission.id})}"
+                                          method="post">
+                                        <button class="btn btn-sm btn-success d-inline-flex align-items-center gap-1" type="submit">
+                                            <span class="material-symbols-outlined fs-6">task_alt</span>
+                                            <span data-i18n="complete">Complete</span>
+                                        </button>
+                                    </form>
+                                    <button class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1"
+                                            th:if="${completionWaiting}"
+                                            type="button"
+                                            disabled>
+                                        <span class="material-symbols-outlined fs-6">pending_actions</span>
+                                        <span data-i18n="complete">Complete</span>
+                                    </button>
+                                    <span class="status-badge status-moving"
+                                          th:if="${completionReady}"
+                                          data-i18n="returnedWaiting">Returned to Base. Waiting for confirmation.</span>
+                                    <span class="text-secondary small"
+                                          th:if="${completionWaiting}"
+                                          data-i18n="robotStillWorking">Robot is still working.</span>
+                                    <details class="stop-mission-details"
+                                             th:if="${mission.isStoppableMission()}">
+                                        <summary class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1">
+                                            <span class="material-symbols-outlined fs-6">cancel</span>
+                                            <span data-i18n="stop">Stop</span>
+                                        </summary>
+                                        <form class="cancellation-inline-form mt-2"
+                                              th:action="@{/staff/missions/{id}/stop(id=${mission.id})}"
+                                              method="post">
+                                            <label class="form-label small fw-semibold mb-1"
+                                                   th:for="|cancellationReason-${mission.id}|"
+                                                   data-i18n="cancellationReason">Cancellation reason</label>
+                                            <select class="form-select form-select-sm mb-2"
+                                                    th:id="|cancellationReason-${mission.id}|"
+                                                    name="cancellationReasonCode"
+                                                    required>
+                                                <option value="" data-i18n-text="Please select a cancellation reason.">Please select a cancellation reason.</option>
+                                                <option th:each="reason : ${cancellationReasonOptions}"
+                                                        th:value="${reason.code}"
+                                                        th:text="${reason.displayName}"
+                                                        th:data-i18n-text="${reason.displayName}">Wrong location</option>
+                                            </select>
+                                            <label class="form-label small fw-semibold mb-1"
+                                                   th:for="|cancellationNote-${mission.id}|"
+                                                   data-i18n="cancellationNote">Cancellation note</label>
+                                            <textarea class="form-control form-control-sm mb-2"
+                                                      th:id="|cancellationNote-${mission.id}|"
+                                                      name="cancellationNote"
+                                                      rows="2"
+                                                      placeholder="Optional note"></textarea>
+                                            <button class="btn btn-sm btn-danger d-inline-flex align-items-center gap-1" type="submit">
+                                                <span class="material-symbols-outlined fs-6">cancel</span>
+                                                <span data-i18n="stopMission">Stop Mission</span>
+                                            </button>
+                                        </form>
+                                    </details>
+                                    <form th:if="${mission.isDeletableMission()}"
+                                          th:action="@{/staff/missions/{id}/delete(id=${mission.id})}"
+                                          method="post">
+                                        <button class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1" type="submit">
+                                            <span class="material-symbols-outlined fs-6">delete</span>
+                                            <span data-i18n="delete">Delete</span>
+                                        </button>
+                                    </form>
+                                    <span class="status-badge mission-status-completed"
+                                          th:if="${mission.isCompletedMission()}"
+                                          data-i18n="completedHistory">Completed history</span>
+                                    <a class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1"
+                                       th:href="@{/staff/missions/{id}(id=${mission.id})}">
+                                        <span class="material-symbols-outlined fs-6">visibility</span>
+                                        <span data-i18n="details">Details</span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="mission-main-grid mt-3">
+                                <div>
+                                    <div class="metric-label" data-i18n="assignedRobot">Assigned Robot</div>
+                                    <div class="compact-value" th:if="${mission.hasAssignedRobot()}" th:text="${mission.assignedRobotName}">Picker Alpha</div>
+                                    <div class="text-secondary small" th:if="${!mission.hasAssignedRobot()}">No robot assigned yet.</div>
+                                </div>
+                                <div>
+                                    <div class="metric-label" data-i18n="strategy">Strategy</div>
+                                    <span class="strategy-chip"
+                                          th:if="${mission.selectedStrategyName != null}"
+                                          th:title="${mission.selectedStrategyName}"
+                                          th:text="${strategyLabel}"
+                                          th:data-i18n-text="${strategyLabel}">FastRouteStrategy</span>
+                                    <span class="text-secondary small" th:if="${mission.selectedStrategyName == null}">Waiting for rule evaluation.</span>
+                                </div>
+                                <div>
+                                    <div class="metric-label" data-i18n="execution">Execution</div>
+                                    <div class="code-text"
+                                         th:text="${mission.executionStepDisplay}"
+                                         th:data-i18n-text="${mission.executionStepDisplay}">NOT_STARTED</div>
+                                </div>
+                                <div>
+                                    <div class="metric-label" data-i18n="decision">Decision</div>
+                                    <div class="text-secondary small" th:if="${!mission.hasDecisionOutput()}">Waiting for mission processing.</div>
+                                    <span class="status-badge status-moving" th:if="${mission.hasDecisionOutput()}">Decision ready</span>
+                                </div>
+                            </div>
+
+                            <details class="technical-details mt-3">
+                                <summary data-i18n="technicalDetails">Technical details</summary>
+                                <div class="mission-detail-grid">
+                                    <div class="technical-detail-box">
+                                        <div class="metric-label" data-i18n="matchedRule">Matched Rule</div>
+                                        <div th:text="${mission.matchedRuleName != null ? mission.matchedRuleName : 'Not evaluated yet.'}">Urgent Task Fast Route Rule</div>
+                                    </div>
+                                    <div class="technical-detail-box">
+                                        <div class="metric-label" data-i18n="selectedStrategy">Selected Strategy</div>
+                                        <span class="strategy-chip"
+                                              th:if="${mission.selectedStrategyName != null}"
+                                              th:text="${mission.selectedStrategyName}"
+                                              th:data-i18n-text="${mission.selectedStrategyName}">FastRouteStrategy</span>
+                                        <span class="text-secondary small" th:if="${mission.selectedStrategyName == null}">Not selected yet.</span>
+                                    </div>
+                                    <div class="technical-detail-box">
+                                        <div class="metric-label">Created</div>
+                                        <div class="code-text" th:text="${mission.createdAtDisplay}">2026-05-23 10:00</div>
+                                    </div>
+                                    <div class="technical-detail-box">
+                                        <div class="metric-label">Processed</div>
+                                        <div class="code-text" th:text="${mission.processedAtDisplay}">Not processed</div>
+                                    </div>
+                                    <div class="technical-detail-box" th:if="${mission.currentPositionKey != null}">
+                                        <div class="metric-label">Current Position</div>
+                                        <div class="code-text" th:text="${mission.currentPositionKey}">base-station</div>
+                                    </div>
+                                    <div class="technical-detail-box" th:if="${mission.isCompletedMission()}">
+                                        <div class="metric-label">Completed</div>
+                                        <div class="code-text" th:text="${mission.completedAtDisplay}">2026-05-23 10:10</div>
+                                    </div>
+                                    <div class="technical-detail-box" th:if="${mission.isCancelledMission()}">
+                                        <div class="metric-label" data-i18n="cancelledAt">Cancelled at</div>
+                                        <div class="code-text" th:text="${mission.cancelledAtDisplay}">2026-05-23 10:10</div>
+                                    </div>
+                                    <div class="technical-detail-box" th:if="${mission.isCancelledMission()}">
+                                        <div class="metric-label" data-i18n="cancellationReason">Cancellation reason</div>
+                                        <div th:text="${mission.cancellationReasonDisplay}"
+                                             th:data-i18n-text="${mission.cancellationReasonDisplay}">Wrong location</div>
+                                    </div>
+                                    <div class="technical-detail-box" th:if="${mission.isCancelledMission()}">
+                                        <div class="metric-label" data-i18n="cancelledBy">Cancelled by</div>
+                                        <div th:text="${mission.cancelledByDisplay}">Nova001</div>
+                                    </div>
+                                    <div class="technical-detail-box detail-grid-full" th:if="${mission.isCancelledMission()}">
+                                        <div class="metric-label" data-i18n="cancellationNote">Cancellation note</div>
+                                        <div class="text-secondary" th:text="${mission.cancellationNoteDisplay}">No cancellation note provided.</div>
+                                    </div>
+                                    <div class="technical-detail-box detail-grid-full" th:if="${mission.notes != null}">
+                                        <div class="metric-label">Staff Note</div>
+                                        <div class="text-secondary" th:text="${mission.notes}">Counter note</div>
+                                    </div>
+                                    <div class="technical-detail-box detail-grid-full" th:if="${mission.assignmentReason != null}">
+                                        <div class="metric-label">Assignment Reason</div>
+                                        <div class="text-secondary" th:text="${mission.assignmentReason}">Assignment reason</div>
+                                    </div>
+                                    <div class="technical-detail-box detail-grid-full" th:if="${mission.actionMessage != null}">
+                                        <div class="metric-label">Robot Action</div>
+                                        <div class="mission-action-summary" th:text="${mission.actionMessage}">Robot action summary</div>
+                                    </div>
+                                    <div class="technical-detail-box detail-grid-full">
+                                        <div class="metric-label">Decision Summary</div>
+                                        <div class="text-secondary" th:text="${mission.decisionSummary != null ? mission.decisionSummary : 'Waiting for mission processing.'}">Decision summary</div>
+                                    </div>
+                                </div>
+                            </details>
+                        </article>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+<script th:src="@{/js/app-notifications.js}" defer></script>
+</body>
+</html>

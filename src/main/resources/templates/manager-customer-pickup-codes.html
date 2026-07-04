@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Customer Pickup Codes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script th:src="@{/js/app-settings.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div class="app-layout">
+    <aside th:replace="~{fragments/sidebar :: sidebar('manager-customer-pickup-codes')}"></aside>
+
+    <div class="workspace">
+        <header class="top-bar">
+            <div class="fw-bold text-primary">Manager Workflow</div>
+            <div th:replace="~{fragments/topbar-controls :: topbarControls}"></div>
+        </header>
+
+        <main class="page-canvas">
+            <section class="d-flex flex-column flex-xl-row justify-content-between gap-3 mb-4">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="status-badge status-default" data-i18n="manager">Manager</span>
+                        <span class="status-badge status-moving" data-i18n="customerPickupCode">Customer Pickup Code</span>
+                    </div>
+                    <h1 class="h2 fw-bold mb-1" data-i18n="customerPickupCodes">Customer Pickup Codes</h1>
+                    <p class="text-secondary mb-0">Create customer pickup codes and preview the demo email sent to the customer.</p>
+                </div>
+                <div class="d-flex align-items-start gap-2">
+                    <a class="btn btn-outline-primary d-flex align-items-center gap-2" th:href="@{/manager/robot-tasks}">
+                        <span class="material-symbols-outlined">warehouse</span>
+                        <span data-i18n="robotTaskBoard">Robot Task Board</span>
+                    </a>
+                </div>
+            </section>
+
+            <div class="alert alert-success" th:if="${successMessage != null}" th:text="${successMessage}">
+                Pickup code created.
+            </div>
+            <div class="alert alert-danger" th:if="${validationErrors != null and !#lists.isEmpty(validationErrors)}">
+                <div class="fw-semibold mb-2">Please fix the pickup code details.</div>
+                <ul class="mb-0">
+                    <li th:each="error : ${validationErrors}" th:text="${error}">Validation error</li>
+                </ul>
+            </div>
+
+            <section class="row g-4 mb-4">
+                <div class="col-12 col-xl-5">
+                    <div class="stitch-card h-100">
+                        <div class="card-title-row">
+                            <span class="material-symbols-outlined">mark_email_read</span>
+                            <h2 class="h5 fw-semibold mb-0" data-i18n="createPickupCode">Create Pickup Code</h2>
+                        </div>
+
+                        <form class="p-4" th:action="@{/manager/customer-pickup-codes}" th:object="${pickupCodeForm}" method="post">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold" for="customerName" data-i18n="customerName">Customer Name</label>
+                                <input class="form-control" id="customerName" type="text" th:field="*{customerName}" maxlength="150" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold" for="customerEmail" data-i18n="customerEmail">Customer Email</label>
+                                <input class="form-control" id="customerEmail" type="email" th:field="*{customerEmail}" maxlength="254" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold" for="customerPhone" data-i18n="customerPhone">Customer Phone</label>
+                                <input class="form-control" id="customerPhone" type="text" th:field="*{customerPhone}" maxlength="30" placeholder="0901234567" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold" for="cargoType" data-i18n-text="Cargo Type">Cargo Type</label>
+                                <select class="form-select" id="cargoType" th:field="*{cargoType}" required>
+                                    <option value="">Select cargo type...</option>
+                                    <option th:each="cargoType : ${cargoTypes}" th:value="${cargoType}" th:text="${cargoType}">Small Cargo</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold" for="pickupLocation" data-i18n-text="Pickup location">Pickup location</label>
+                                <select class="form-select" id="pickupLocation" th:field="*{pickupLocation}" required>
+                                    <option value="">Select pickup location...</option>
+                                    <optgroup th:each="zoneEntry : ${locationsByZone}"
+                                              th:label="${zoneEntry.key}">
+                                        <option th:each="location : ${zoneEntry.value}"
+                                                th:value="${location}"
+                                                th:text="${location}">A1</option>
+                                    </optgroup>
+                                </select>
+                                <div class="form-text">Small Cargo -> A1-A9, Medium Cargo -> B1-B9, Large Cargo -> C1-C9.</div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold" for="note">Optional note</label>
+                                <textarea class="form-control" id="note" rows="3" th:field="*{note}" maxlength="1000"></textarea>
+                            </div>
+                            <button class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2" type="submit">
+                                <span class="material-symbols-outlined">add</span>
+                                <span data-i18n="createPickupCode">Create Pickup Code</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="col-12 col-xl-7">
+                    <div class="stitch-card h-100" th:if="${createdPickupCode == null}">
+                        <div class="card-title-row">
+                            <span class="material-symbols-outlined">drafts</span>
+                            <h2 class="h5 fw-semibold mb-0" data-i18n="emailPreview">Email Preview</h2>
+                        </div>
+                        <div class="empty-state">Create a pickup code to show the demo email preview.</div>
+                    </div>
+
+                    <div class="stitch-card h-100" th:if="${createdPickupCode != null}">
+                        <div class="card-title-row justify-content-between">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="material-symbols-outlined">mark_email_read</span>
+                                <h2 class="h5 fw-semibold mb-0" data-i18n="emailPreview">Email Preview</h2>
+                            </div>
+                            <span class="status-badge status-moving code-text" th:text="${createdPickupCode.code}">CUS-2026-A91K</span>
+                        </div>
+                        <div class="p-4">
+                            <div class="row g-3 mb-3">
+                                <div class="col-12 col-md-6">
+                                    <div class="metric-card p-3 h-100">
+                                        <div class="metric-label" data-i18n="pickupCode">Pickup Code</div>
+                                        <div class="fw-bold code-text" th:text="${createdPickupCode.code}">CUS-2026-A91K</div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <div class="metric-card p-3 h-100">
+                                        <div class="metric-label" data-i18n="codeStatus">Code Status</div>
+                                        <span class="status-badge mission-status-pending" data-i18n="unused">Unused</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="metric-card p-3 mb-3">
+                                <div class="metric-label">Subject</div>
+                                <div class="fw-semibold" th:text="${createdPickupCode.emailPreviewSubject}">Smart Warehouse Pickup Code</div>
+                            </div>
+                            <pre class="syntax-helper p-3 mb-3" th:text="${createdPickupCode.emailPreviewText}">Email body</pre>
+                            <div class="metric-card p-3 mb-3">
+                                <div class="metric-label">Vietnamese Subject</div>
+                                <div class="fw-semibold" th:text="${createdPickupCode.vietnameseEmailPreviewSubject}">Mã nhận hàng Smart Warehouse</div>
+                            </div>
+                            <pre class="syntax-helper p-3 mb-0" th:text="${createdPickupCode.vietnameseEmailPreviewText}">Vietnamese email body</pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="stitch-card">
+                <div class="card-title-row justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="material-symbols-outlined">list_alt</span>
+                        <h2 class="h5 fw-semibold mb-0">Recent Pickup Codes</h2>
+                    </div>
+                    <span class="status-badge status-default" th:text="|${pickupCodes != null ? #lists.size(pickupCodes) : 0} code(s)|">0 code(s)</span>
+                </div>
+                <div class="p-4">
+                    <div class="empty-state" th:if="${pickupCodes == null or #lists.isEmpty(pickupCodes)}">
+                        No customer pickup codes have been created yet.
+                    </div>
+                    <div class="table-responsive" th:if="${pickupCodes != null and !#lists.isEmpty(pickupCodes)}">
+                        <table class="table align-middle mb-0">
+                            <thead>
+                            <tr>
+                                <th data-i18n="pickupCode">Pickup Code</th>
+                                <th>Customer</th>
+                                <th>Cargo / Location</th>
+                                <th data-i18n="codeStatus">Code Status</th>
+                                <th>Created / Used</th>
+                                <th>Linked Mission</th>
+                                <th data-i18n="emailPreview">Email Preview</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="pickupCode : ${pickupCodes}">
+                                <td>
+                                    <div class="fw-bold code-text" th:text="${pickupCode.code}">CUS-2026-A91K</div>
+                                    <div class="text-secondary small" th:if="${pickupCode.createdBy != null}" th:text="|Created by ${pickupCode.createdBy}|">Created by Manage</div>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold" th:text="${pickupCode.customerName}">Customer</div>
+                                    <div class="text-secondary small" th:text="${pickupCode.customerEmail}">customer@example.com</div>
+                                    <div class="text-secondary small" th:text="${pickupCode.customerPhone}">0901234567</div>
+                                </td>
+                                <td>
+                                    <div th:text="${pickupCode.cargoType}">Small Cargo</div>
+                                    <div class="text-secondary small">
+                                        <span th:text="${pickupCode.warehouseZone}">Zone A</span>
+                                        <span>/</span>
+                                        <span class="code-text" th:text="${pickupCode.pickupLocation}">A1</span>
+                                    </div>
+                                    <span class="status-badge priority-high" data-i18n-text="Priority: High">Priority: High</span>
+                                </td>
+                                <td>
+                                    <span class="status-badge"
+                                          th:classappend="${pickupCode.unused} ? ' mission-status-pending' : ' mission-status-completed'"
+                                          th:text="${pickupCode.statusDisplay}"
+                                          th:data-i18n-text="${pickupCode.statusDisplay}">Unused</span>
+                                </td>
+                                <td>
+                                    <div class="metric-label">Created</div>
+                                    <div class="code-text" th:text="${pickupCode.createdAtDisplay}">2026-06-23 10:00</div>
+                                    <div class="metric-label mt-2" data-i18n="usedBy">Used By</div>
+                                    <div class="small" th:text="${pickupCode.usedByDisplay}">Not used</div>
+                                    <div class="metric-label mt-2" data-i18n="usedAt">Used At</div>
+                                    <div class="code-text" th:text="${pickupCode.usedAtDisplay}">Not used</div>
+                                </td>
+                                <td th:text="${pickupCode.linkedMissionDisplay}">Not linked</td>
+                                <td>
+                                    <details class="technical-details">
+                                        <summary data-i18n="emailPreview">Email Preview</summary>
+                                        <div class="metric-label">Subject</div>
+                                        <div class="small fw-semibold mb-2" th:text="${pickupCode.emailPreviewSubject}">Smart Warehouse Pickup Code</div>
+                                        <pre class="syntax-helper p-2 small mb-0" th:text="${pickupCode.emailPreviewText}">Email body</pre>
+                                    </details>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+<script th:src="@{/js/app-notifications.js}" defer></script>
+</body>
+</html>

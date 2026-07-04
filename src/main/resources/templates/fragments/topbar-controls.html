@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div class="top-actions" th:fragment="topbarControls">
+    <div class="notification-widget" data-notification-widget>
+        <button class="icon-button notification-toggle"
+                type="button"
+                aria-label="Notifications"
+                title="Notifications"
+                data-i18n-aria-label="notifications"
+                data-i18n-title="notifications"
+                data-notification-toggle>
+            <span class="material-symbols-outlined">notifications</span>
+            <span class="notification-count" data-notification-count hidden>0</span>
+        </button>
+        <section class="notification-panel"
+                 data-notification-panel
+                 hidden
+                 aria-label="Recent notifications">
+            <div class="notification-panel-header">
+                <strong data-i18n="recentNotifications">Notifications</strong>
+                <button class="notification-clear-button"
+                        type="button"
+                        data-notification-clear
+                        data-i18n="clearNotifications">Clear</button>
+            </div>
+            <div class="notification-list" data-notification-list>
+                <div class="notification-empty" data-i18n="noNotifications">No notifications yet.</div>
+            </div>
+        </section>
+    </div>
+
+    <div class="topbar-widget settings-widget" data-settings-widget>
+        <button class="icon-button"
+                type="button"
+                aria-label="Settings"
+                title="Settings"
+                data-i18n-aria-label="settings"
+                data-i18n-title="settings"
+                data-app-dropdown-toggle>
+            <span class="material-symbols-outlined">settings</span>
+        </button>
+        <section class="topbar-dropdown-panel settings-dropdown-panel"
+                 data-app-dropdown-panel
+                 hidden
+                 aria-label="Settings">
+            <div class="topbar-dropdown-header">
+                <strong data-i18n="settings">Settings</strong>
+                <span class="settings-saved-message" data-settings-saved hidden data-i18n="settingsSaved">Settings applied.</span>
+            </div>
+            <form class="compact-settings-form" data-settings-form>
+                <label class="compact-setting-row" for="topbar-language-setting">
+                    <span data-i18n="language">Language</span>
+                    <select class="form-select form-select-sm"
+                            id="topbar-language-setting"
+                            data-setting-field="language"
+                            aria-label="Language">
+                        <option value="en" data-i18n="english">English</option>
+                        <option value="vi" data-i18n="vietnamese">Tiếng Việt</option>
+                    </select>
+                </label>
+                <label class="compact-setting-row" for="topbar-theme-setting">
+                    <span data-i18n="theme">Theme</span>
+                    <select class="form-select form-select-sm"
+                            id="topbar-theme-setting"
+                            data-setting-field="theme"
+                            aria-label="Theme">
+                        <option value="light" data-i18n="lightMode">Light mode</option>
+                        <option value="dark" data-i18n="darkMode">Dark mode</option>
+                    </select>
+                </label>
+                <label class="compact-setting-row" for="topbar-density-setting">
+                    <span data-i18n="density">UI Density</span>
+                    <select class="form-select form-select-sm"
+                            id="topbar-density-setting"
+                            data-setting-field="density"
+                            aria-label="UI Density">
+                        <option value="compact" data-i18n="compact">Compact</option>
+                        <option value="comfortable" data-i18n="comfortable">Comfortable</option>
+                    </select>
+                </label>
+            </form>
+        </section>
+    </div>
+
+    <div class="topbar-widget user-widget" data-user-widget>
+        <button class="profile-dot profile-button"
+                type="button"
+                aria-label="User menu"
+                title="User menu"
+                data-i18n-aria-label="userMenu"
+                data-i18n-title="userMenu"
+                data-app-dropdown-toggle
+                th:text="${currentUsername != null ? #strings.substring(currentUsername, 0, 1) : 'U'}">U</button>
+        <section class="topbar-dropdown-panel user-dropdown-panel"
+                 data-app-dropdown-panel
+                 hidden
+                 aria-label="User menu">
+            <div class="user-menu-name" th:text="${currentUsername != null ? currentUsername : 'User'}">User</div>
+            <div class="user-menu-role">
+                <span data-i18n="role">Role</span>:
+                <strong th:text="${currentRoleLabel != null ? currentRoleLabel : 'USER'}"
+                        th:data-i18n-text="${currentRoleLabel != null ? currentRoleLabel : 'USER'}">USER</strong>
+            </div>
+            <form th:action="@{/logout}" method="post">
+                <button class="user-menu-logout" type="submit">
+                    <span class="material-symbols-outlined">logout</span>
+                    <span data-i18n="logout">Logout</span>
+                </button>
+            </form>
+        </section>
+    </div>
+</div>
+</body>
+</html>

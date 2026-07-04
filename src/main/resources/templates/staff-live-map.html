@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" data-default-theme="dark">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Live Warehouse Map</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script th:src="@{/js/app-settings.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/staff-live-map.css}">
+</head>
+<body class="live-map-standalone">
+<section class="live-map-embed fullscreen-live-map" aria-label="Live Warehouse Map visual board">
+    <div class="live-map-page">
+        <header class="map-header glass-panel" aria-label="Live warehouse map header">
+            <div class="map-title-group">
+                <span class="map-kicker">Staff View</span>
+                <h1>Live Warehouse Map</h1>
+                <p>Track robot position, battery, strategy, and mission flow from the backend state.</p>
+            </div>
+            <div class="map-header-actions">
+                <div th:replace="~{fragments/topbar-controls :: topbarControls}"></div>
+                <div class="live-status" aria-label="Map display mode">
+                    <span class="live-dot" aria-hidden="true"></span>
+                    <span id="map-display-mode">All Robots</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="dashboard-grid">
+            <aside class="left-sidebar panel-stack" aria-label="Map controls and legend">
+                <section class="panel robot-control-panel" aria-labelledby="robot-control-title">
+                    <h2 id="robot-control-title" class="panel-title">Robots</h2>
+                    <div class="robot-control-list">
+                        <button id="show-all-robots-button"
+                                class="show-all-robots-button is-active"
+                                data-show-all-robots
+                                type="button">
+                            Show All Robots
+                        </button>
+                        <button class="robot-select-button"
+                                th:each="flow : ${robotMissionFlows}"
+                                th:data-robot-select="${flow.key}"
+                                th:data-zone-target="${flow.focusZoneKey}"
+                                th:data-current-zone="${flow.focusZoneKey}"
+                                th:data-location-code="${flow.locationCode != null ? flow.locationCode : ''}"
+                                type="button">
+                            <span class="robot-symbol" th:classappend="${flow.colorClass}" aria-hidden="true"></span>
+                            <span class="robot-control-text">
+                                <strong th:text="${flow.robotName}">Picker Alpha</strong>
+                            </span>
+                        </button>
+                    </div>
+                </section>
+
+                <section class="panel zones-panel" aria-labelledby="zones-title">
+                    <h2 id="zones-title" class="panel-title">Zones</h2>
+                    <div class="zone-buttons" role="group" aria-label="Select warehouse zone">
+                        <button class="zone-button" type="button" data-zone-target="a">
+                            <span class="zone-swatch zone-swatch-a" aria-hidden="true"></span>
+                            <span>Zone A</span>
+                        </button>
+                        <button class="zone-button" type="button" data-zone-target="b">
+                            <span class="zone-swatch zone-swatch-b" aria-hidden="true"></span>
+                            <span>Zone B</span>
+                        </button>
+                        <button class="zone-button is-active" type="button" data-zone-target="c">
+                            <span class="zone-swatch zone-swatch-c" aria-hidden="true"></span>
+                            <span>Zone C</span>
+                        </button>
+                    </div>
+                </section>
+
+                <section class="panel legend-panel" aria-labelledby="legend-title">
+                    <h2 id="legend-title" class="panel-title">Map Legend</h2>
+                    <ul class="legend-list">
+                        <li class="legend-item">
+                            <span>Small Cargo</span>
+                            <span class="cargo-dot cargo-small" aria-hidden="true"></span>
+                        </li>
+                        <li class="legend-item">
+                            <span>Medium Cargo</span>
+                            <span class="cargo-dot cargo-medium" aria-hidden="true"></span>
+                        </li>
+                        <li class="legend-item">
+                            <span>Large Cargo</span>
+                            <span class="cargo-dot cargo-large" aria-hidden="true"></span>
+                        </li>
+                        <li class="legend-item">
+                            <span>Route Network</span>
+                            <span class="route-sample route-network" aria-hidden="true"></span>
+                        </li>
+                    </ul>
+                </section>
+            </aside>
+
+            <section class="warehouse-shell" aria-label="Fullscreen live warehouse map demo">
+                <div class="warehouse-board" aria-label="Warehouse board with active zone, routes, robots, and stations">
+                    <div class="board-scan" aria-hidden="true"></div>
+
+                    <div class="board-toolbar" aria-label="Visual route controls">
+                        <p id="zone-status" class="zone-status" aria-live="polite">Showing all robots across all zones</p>
+                        <div class="demo-actions">
+                            <button id="next-zone-button" class="demo-button" type="button">Next Zone</button>
+                            <button id="start-route-button"
+                                    class="demo-button demo-button-primary"
+                                    type="button"
+                                    disabled>
+                                Visual Route Preview
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="active-zone-map" class="active-zone-map" aria-live="polite"></div>
+
+                    <div id="station-row" class="station-row is-hidden" hidden aria-label="Zone C station area">
+                        <div class="station base-station">
+                            <span class="station-core base-core" aria-hidden="true"></span>
+                            <div>
+                                <strong>Base Station</strong>
+                                <span>Robot home dock</span>
+                            </div>
+                        </div>
+                        <div class="station charging-station">
+                            <span class="station-core charge-core" aria-hidden="true">
+                                <span class="charge-bolt"></span>
+                            </span>
+                            <div>
+                                <strong>Charging Station</strong>
+                                <span>Energy recovery</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <aside class="right-sidebar panel-stack" aria-label="Selected robot mission flow">
+                <section class="panel mission-flow" aria-labelledby="mission-flow-title">
+                    <h2 id="mission-flow-title" class="panel-title">Mission Flow</h2>
+
+                    <div id="mission-flow-instruction" class="mission-flow-instruction">
+                        Select a robot to view status, battery, strategy, and mission flow.
+                    </div>
+
+                    <div id="route-animation-message"
+                         class="route-animation-message"
+                         hidden
+                         aria-live="polite"></div>
+
+                    <article class="robot-flow-card"
+                             th:each="flow : ${robotMissionFlows}"
+                             th:data-robot-flow="${flow.key}"
+                             th:data-active-step="${flow.activeStepKey != null ? flow.activeStepKey : 'none'}"
+                             th:data-current-zone="${flow.focusZoneKey}"
+                             th:data-location-code="${flow.locationCode != null ? flow.locationCode : ''}"
+                             hidden>
+                        <div class="selected-robot-heading">
+                            <span class="robot-symbol" th:classappend="${flow.colorClass}" aria-hidden="true"></span>
+                            <div>
+                                <strong th:text="${flow.robotName}">Picker Alpha</strong>
+                                <span>Selected Robot</span>
+                            </div>
+                        </div>
+
+                        <div class="current-target-box"
+                             th:if="${flow.hasMission() and flow.activeStepKey != 'returned'}">
+                            <span>Current Target</span>
+                            <strong th:text="${'Move to ' + flow.targetText}">Move to Zone A - A1</strong>
+                        </div>
+                        <div class="current-target-box"
+                             th:if="${flow.hasMission() and flow.activeStepKey == 'returned'}">
+                            <span>Current Status</span>
+                            <strong data-i18n-text="Returned to Base. Waiting for confirmation.">Returned to Base. Waiting for confirmation.</strong>
+                        </div>
+
+                        <div class="map-empty-state" th:if="${!flow.hasMission()}">
+                            No active pickup mission assigned.
+                        </div>
+
+                        <ol class="pickup-flow-tree" th:if="${flow.hasMission()}">
+                            <li class="flow-step"
+                                data-flow-step="assigned"
+                                th:classappend="${flow.activeStepKey == 'assigned'} ? ' is-current' : ''">
+                                <span class="flow-step-index">1</span>
+                                <span class="flow-step-body">
+                                    <strong>Assigned</strong>
+                                </span>
+                            </li>
+                            <li class="flow-step"
+                                data-flow-step="move"
+                                th:classappend="${flow.activeStepKey == 'move'} ? ' is-current' : ''">
+                                <span class="flow-step-index">2</span>
+                                <span class="flow-step-body">
+                                    <strong>Moving</strong>
+                                    <small th:text="${'Move to ' + flow.targetText}">Move to Zone A - A1</small>
+                                </span>
+                            </li>
+                            <li class="flow-step"
+                                data-flow-step="pickup"
+                                th:classappend="${flow.activeStepKey == 'pickup'} ? ' is-current' : ''">
+                                <span class="flow-step-index">3</span>
+                                <span class="flow-step-body">
+                                    <strong>Pickup</strong>
+                                </span>
+                            </li>
+                            <li class="flow-step"
+                                data-flow-step="return"
+                                th:classappend="${flow.activeStepKey == 'return'} ? ' is-current' : ''">
+                                <span class="flow-step-index">4</span>
+                                <span class="flow-step-body">
+                                    <strong>Returning</strong>
+                                </span>
+                            </li>
+                            <li class="flow-step"
+                                data-flow-step="returned"
+                                th:classappend="${flow.activeStepKey == 'returned'} ? ' is-current' : ''">
+                                <span class="flow-step-index">5</span>
+                                <span class="flow-step-body">
+                                    <strong>Returned / Waiting Confirmation</strong>
+                                </span>
+                            </li>
+                        </ol>
+                    </article>
+                </section>
+            </aside>
+        </div>
+    </div>
+</section>
+<script th:src="@{/js/app-notifications.js}" defer></script>
+<script th:src="@{/js/staff-live-map.js}" defer></script>
+</body>
+</html>
